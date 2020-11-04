@@ -15,7 +15,7 @@ class Database(object):
 
         #Try to create the database tables if the do not already exist
         try:
-            # Create a table for storing Habits - FEHLT CreationDate LongestStreak, CurrentStreak, Break
+            # Create a table for storing Habits
             db.execute("""CREATE TABLE habits (
                 HabitID INTEGER PRIMARY KEY,
                 HabitName TEXT NOT NULL,
@@ -24,6 +24,15 @@ class Database(object):
                 CreationDate DATE NOT NULL,
                 CurrentStreak INTEGER NOT NULL,
                 LongestStreak INTEGER NOT NULL
+            )
+            """)
+
+            #Create a table for storing tracking data
+            db.execute("""CREATE TABLE trackingdata (
+                DataID INTEGER PRIMARY KEY,
+                CheckDate DATE NOT NULL,
+                HabitID INTEGER NOT NULL,
+                FOREIGN KEY (HabitID) REFERENCES habits(HabitID)
             )
             """)
 
