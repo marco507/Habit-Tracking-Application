@@ -102,3 +102,4 @@ class Pipeline(object):
     def __init__(self):
         self.manage = Habit()
         self.analyse = analytics.Analytics()
+
