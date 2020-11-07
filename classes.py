@@ -42,7 +42,7 @@ class Habit(object):
             #INSERT the new habit into the database
             else:
                 #INSERT Statement
-                self.__db.execute('''INSERT INTO habits VALUES(NULL, ?, ?, ?, ?, 0, 0)''', (name, period, self.__username, date.today()))
+                self.__db.execute('''INSERT INTO habits VALUES(NULL, ?, ?, ?, ?, 0, 0, 0)''', (name, period, self.__username, date.today()))
                 #Commit the changes
                 self.__connection.commit()
                 #Success message
@@ -80,12 +80,14 @@ class Habit(object):
     #Method for checking a habit
     def check(self, name):
     
+        entry_date = date.today()
+
         #Check if the habit exists
         if self.__check_existence(name):
 
             #Check if an data entry for today already exists
              self.__db.execute('''SELECT * FROM trackingdata INNER JOIN habits ON habits.HabitID = trackingdata.HabitID
-                                     WHERE habits.HabitName = ? AND trackingdata.CheckDate = ?''', (name, date.today(),))
+                                     WHERE habits.HabitName = ? AND trackingdata.CheckDate = ?''', (name, entry_date,))
              exists =  self.__db.fetchall()
 
             #If the habit is already checked return an error message
@@ -122,8 +124,8 @@ class Habit(object):
                     last_date = datetime.strptime(last_date, '%Y-%m-%d')
                     last_date = last_date.date()
 
-                    #Calculate the difference between the last checked date and todays date
-                    date_difference = date.today() - last_date
+                    #Calculate the difference between the last checked date and the entry date
+                    date_difference = entry_date - last_date
 
                     #Check the date difference against the habit period
                     #For period the Daily the date difference must be exactly 1 day
@@ -135,7 +137,10 @@ class Habit(object):
                             print("Streak for " + name + " increased")
                         #If the date difference is > 1 set the streak to zero
                         else:
+                            #Set the current streak to zero
                             self.__db.execute('''UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?''', (habit_id,))
+                            #Increase the breaks by one
+                            self.__db.execute('''UPDATE habits SET Breaks = Breaks + 1 WHERE HabitID = ?''', (habit_id,))
                             #Print a message if the streak is broken
                             print("Streak for " + name + " set to zero")
 
@@ -147,7 +152,10 @@ class Habit(object):
                             print("Streak for " + name + " increased")
                         #If the date difference is > 7 set the streak to zero
                         else:
+                            #Set the current streak to zero
                             self.__db.execute('''UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?''', (habit_id,))
+                            #Increase the breaks by one
+                            self.__db.execute('''UPDATE habits SET Breaks = Breaks + 1 WHERE HabitID = ?''', (habit_id,))
                             #Print a message if the streak is broken
                             print("Streak for " + name + " set to zero")
 
@@ -168,7 +176,7 @@ class Habit(object):
                     self.__db.execute('''UPDATE habits SET LongestStreak = ? WHERE HabitID = ?''', (current_streak, habit_id))
                 
                 #INSERT a new entry in the tracking data table
-                self.__db.execute('''INSERT INTO trackingdata VALUES(NULL, ?, ?)''',  (date.today(), habit_id))      
+                self.__db.execute('''INSERT INTO trackingdata VALUES(NULL, ?, ?)''',  (entry_date, habit_id))      
 
         #Give back an error message if the habit does not exists     
         else:    

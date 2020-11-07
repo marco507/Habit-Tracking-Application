@@ -23,7 +23,8 @@ class Database(object):
                 User TEXT NOT NULL,
                 CreationDate DATE NOT NULL,
                 CurrentStreak INTEGER NOT NULL,
-                LongestStreak INTEGER NOT NULL
+                LongestStreak INTEGER NOT NULL,
+                Breaks INTEGER NOT NULL
             )
             """)
 

@@ -2,9 +2,12 @@
 import pandas as pd
 import sqlite3
 
+
+#Class for combining all functions in a single namespace
 class Analytics():
 
-    def show(self):
+    @staticmethod
+    def show():
         #Establish DB connection
         connection = sqlite3.connect('database.db')
 
@@ -14,7 +17,8 @@ class Analytics():
         #Close the connection
         connection.close()          
 
-    def tracking(self):
+    @staticmethod
+    def tracking():
         #Establish DB connection
         connection = sqlite3.connect('database.db')
 
