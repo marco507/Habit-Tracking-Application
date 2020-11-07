@@ -15,11 +15,19 @@ class Habit(object):
         self.__connection = sqlite3.connect('database.db')
         self.__db = self.__connection.cursor() 
 
-    #Checks if a habit exists in a database
+    #Helper function for checking if a habit exist in a database
     def __check_existence(self, name):
         self.__db.execute('''SELECT * FROM habits WHERE HabitName = ? AND User = ? ''', (name, self.__username))
         exists = self.__db.fetchall()
         return exists
+
+    #Helper function for extracting a single value from a returned SELECT query
+    def __extract_value(self):
+    #Extracting the numeric value from the returned list of tuples
+        result = self.__db.fetchall()
+        for i in result:
+            for j in i:
+                return j
 
     #Method for creating and storing a habit in the Database
     def create(self, name, period):
@@ -58,6 +66,10 @@ class Habit(object):
 
             #Commit the changes
             self.__connection.commit()
+
+            #Print a success message
+            print("Habit " + name + " deleted")
+
             #Close the connection
             self.__connection.close() 
 
@@ -72,7 +84,8 @@ class Habit(object):
         if self.__check_existence(name):
 
             #Check if an data entry for today already exists
-             self.__db.execute('''SELECT * FROM trackingdata WHERE CheckDate = ?''', (date.today(),))
+             self.__db.execute('''SELECT * FROM trackingdata INNER JOIN habits ON habits.HabitID = trackingdata.HabitID
+                                     WHERE habits.HabitName = ? AND trackingdata.CheckDate = ?''', (name, date.today(),))
              exists =  self.__db.fetchall()
 
             #If the habit is already checked return an error message
@@ -82,52 +95,80 @@ class Habit(object):
              else:
                 #Return the HabitID from the database
                 self.__db.execute('''SELECT HabitID FROM habits WHERE HabitName = ? AND User = ?''', (name, self.__username))
-                result = self.__db.fetchall()
-
                 #Extracting the numeric value from the returned list of tuples
-                for i in result:
-                    for j in i:
-                        habit_id = j
+                habit_id = self.__extract_value()
 
-                #Check if the streak is interrupted
+                #Manage the streak
+
                 #Return the period of the habit from the database
                 self.__db.execute('''SELECT Period FROM habits WHERE HabitName = ? AND User = ?''', (name, self.__username))
-                result = self.__db.fetchall()
-
                 #Extracting the value for the period from the returned list of tuples
-                for i in result:
-                    for j in i:
-                        period = j
+                period = self.__extract_value()
 
                 #Return the last tracking data entry of the habit
                 self.__db.execute('''SELECT MAX(CheckDate) FROM trackingdata WHERE HabitID = ?''', (habit_id,))
-                result = self.__db.fetchall()
-
                 #Extract the date string from the returned list of tuples
-                for i in result:
-                    for j in i:
-                        last_date = j
+                last_date = self.__extract_value()
 
-                #Convert the string into a datetime object and then into an date object
-                last_date = datetime.strptime(last_date, '%Y-%m-%d')
-                last_date = last_date.date()
+                #If the habit is checked the first time increase the streak
+                if not last_date:
+                    self.__db.execute('''UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?''', (habit_id,))
+                    #Print a message if the streak is mantained
+                    print("Streak for " + name + " increased")
 
-                #Calculate the difference between the last checked date and todays date
-                date_difference = date.today() - last_date
+                #If the habit already has tracking data, check if the streak is interrupted
+                else:
+                    #Convert the string into a datetime object and then into an date object
+                    last_date = datetime.strptime(last_date, '%Y-%m-%d')
+                    last_date = last_date.date()
 
-                #Check the date difference against the habit period
-                #For period the Daily the date difference must be exactly 1 day
-                if period == "Daily":
-                    #If the date difference is 1 day, increment the streak by 1
-                    if date_difference.days == 1:
-                        self.__db.execute('''UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?''', (habit_id,))
-                    #If the date difference is > 1 set the streak to zero
+                    #Calculate the difference between the last checked date and todays date
+                    date_difference = date.today() - last_date
+
+                    #Check the date difference against the habit period
+                    #For period the Daily the date difference must be exactly 1 day
+                    if period == "Daily":
+                        #If the date difference is 1 day, increment the streak by 1
+                        if date_difference.days == 1:
+                            self.__db.execute('''UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?''', (habit_id,))
+                            #Print a message if the streak is mantained
+                            print("Streak for " + name + " increased")
+                        #If the date difference is > 1 set the streak to zero
+                        else:
+                            self.__db.execute('''UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?''', (habit_id,))
+                            #Print a message if the streak is broken
+                            print("Streak for " + name + " set to zero")
+
+                    #If the period of the habit is Weekly, the difference must be <= 7
                     else:
-                        self.__db.execute('''UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?''', (habit_id,))
+                        if date_difference.days <= 7:
+                            self.__db.execute('''UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?''', (habit_id,))
+                            #Print a message if the streak is mantained
+                            print("Streak for " + name + " increased")
+                        #If the date difference is > 7 set the streak to zero
+                        else:
+                            self.__db.execute('''UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?''', (habit_id,))
+                            #Print a message if the streak is broken
+                            print("Streak for " + name + " set to zero")
 
-                #INSERT a new entry in the tracking data table
-                self.__db.execute('''INSERT INTO trackingdata VALUES(NULL, ?, ?)''',  (date.today(), habit_id))
+                #Check if the current streak is the longest streak
+
+                #Query the current streak
+                self.__db.execute('''SELECT CurrentStreak FROM habits WHERE HabitID = ?''', (habit_id,))
+                #Extract the value from the result
+                current_streak = self.__extract_value()
+
+                #Query the longest streak
+                self.__db.execute('''SELECT LongestStreak FROM habits WHERE HabitID = ?''', (habit_id,))
+                #Extract the value from the result
+                longest_streak = self.__extract_value()
+
+                #UPDATE the value if the current streak is the longest streak
+                if current_streak > longest_streak:
+                    self.__db.execute('''UPDATE habits SET LongestStreak = ? WHERE HabitID = ?''', (current_streak, habit_id))
                 
+                #INSERT a new entry in the tracking data table
+                self.__db.execute('''INSERT INTO trackingdata VALUES(NULL, ?, ?)''',  (date.today(), habit_id))      
 
         #Give back an error message if the habit does not exists     
         else:    
@@ -137,59 +178,6 @@ class Habit(object):
         self.__connection.commit()
         #Close the connection
         self.__connection.close() 
-
-    def test(self, name):
-        self.__db.execute('''SELECT Period FROM habits WHERE HabitName = ? AND User = ?''', (name, self.__username))
-        result = self.__db.fetchall()
-
-        #Extracting the value for the period from the returned list of tuples
-        for i in result:
-            for j in i:
-                period = j
-
-        #Return the HabitID from the database
-        self.__db.execute('''SELECT HabitID FROM habits WHERE HabitName = ? AND User = ?''', (name, self.__username))
-        result = self.__db.fetchall()
-
-        #Extracting the numeric value from the returned list of tuples
-        for i in result:
-            for j in i:
-                habit_id = j
-        
-        #Return the last tracking data entry of the habit
-        self.__db.execute('''SELECT MAX(CheckDate) FROM trackingdata WHERE HabitID = ?''', (habit_id,))
-        result = self.__db.fetchall()
-
-        #Extract the date string from the returned list of tuples
-        for i in result:
-            for j in i:
-                last_date = j
-
-        #Convert the string into a datetime object and then into an date object
-        last_date = datetime.strptime(last_date, '%Y-%m-%d')
-        last_date = last_date.date()
-
-        #Calculate the difference between the last checked date and todays date
-        date_difference = date.today() - last_date
-
-        #Check the date difference against the habit period
-        #For period the Daily the date difference must be exactly 1 day
-        if period == "Daily":
-            #If the date difference is 1 day, increment the streak by 1
-            if date_difference.days == 1:
-                self.__db.execute('''UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?''', (habit_id,))
-            #If the date difference is > 1 set the streak to zero
-            else:
-                self.__db.execute('''UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?''', (habit_id,))
-        
-        self.__connection.commit()
-
-        #Stop am 05.11
-
-        #Close the connection
-        self.__connection.close() 
-
-
     
 #Class for wrapping all functionality for the command line interface
 class Pipeline(object):
