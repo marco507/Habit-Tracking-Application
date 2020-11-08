@@ -4,10 +4,10 @@ import fire
 import os
 import login
 import classes
-from random import seed, randint
+from random import randint, choice
 from datetime import date, datetime, timedelta
 
-class Database():
+class Database(object):
 
     def __init__(self):
         #Establish the database connection and cursor
@@ -94,23 +94,48 @@ class Database():
         start_date = date(2020, 10, 1)
         end_date= date(2020, 10, 31)
 
-        #Generate a seed for the random habit checks
-        seed(1)
+        #Weigh the possibility for a streak break at 25% for daily habits
+        possibility_daily = ['A'] * 75 + ['B'] * 25
 
-        #Set the entry_date to start_date
-        entry_date = start_date
+        #Weigh the possibility for a streak break at 25% for weekly habits
+        #and the chance to check a habit before a week has passed at 15%
+        possibility_weekly = ['A'] * 60 + ['B'] * 25 + ['C'] * 15
 
         #Loop through all default habits
-        
-        while entry_date < end_date:
-            #Check the habit at the entry_date
+        for i in default_habits:
+            #Set the entry_date to start_date
+            entry_date = start_date
+
+            #Fill in the tracking data
+            while entry_date < end_date:
+                #Check the habit at the entry_date
+                testdata = classes.Habit()
+                testdata.check(i, entry_date)
+                
+                #Generate new random date
+                #Check if the period is daily or weekly
+                if default_habits[i] == "Daily":
+                    #Choice A = Streak continues = 1 day timediffernence
+                    if choice(possibility_daily) == "A":
+                        entry_date = entry_date + timedelta(days=1)
+                    #Choice B = Streak is broken = random 2 or 3 day timedifference
+                    else:
+                        entry_date = entry_date + timedelta(days=randint(2,3))
+                
+                else:
+                    #Choice A = Streak continues = 7 day timediffernence
+                    if choice(possibility_weekly) == "A":
+                        entry_date = entry_date + timedelta(days=7)
+                    #Choice B = Streak is broken = random 8 to 10 day timedifference
+                    elif choice(possibility_weekly) == "B":
+                        entry_date = entry_date + timedelta(days=randint(8,10))
+                    #Choice C = Streak continous = random 4 to 6 day timedifference
+                    else:
+                        entry_date = entry_date + timedelta(days=randint(4,6))
+
+            #Set the last tracking entry at the end date (31.10.2020)
             testdata = classes.Habit()
-            testdata.check("Workout", entry_date)
-            #Generate new random date
-            step = randint(1,2)
-            entry_date = entry_date + timedelta(days = step)
-
-
+            testdata.check(i, end_date)
 
 if __name__ == "__main__":
     #Expose the database class to the command line
