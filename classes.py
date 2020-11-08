@@ -29,8 +29,21 @@ class Habit(object):
             for j in i:
                 return j
 
+    #Helper function that prevents real users from manipulating date values 
+    def __filter_date(self, entry_date):
+        if self.__username != "test_user":
+            #Return todays date
+            return date.today()
+        else:
+            #Return the date given as argument back
+            return entry_date
+
+
     #Method for creating and storing a habit in the Database
-    def create(self, name, period):
+    def create(self, name, period, entry_date = date.today):
+
+        #Ensure the correct date for normal program execution
+        entry_date = self.__filter_date(entry_date)
         
         #Check if the period value is correct
         if period == "Daily" or period == "Weekly":    
@@ -42,7 +55,7 @@ class Habit(object):
             #INSERT the new habit into the database
             else:
                 #INSERT Statement
-                self.__db.execute('''INSERT INTO habits VALUES(NULL, ?, ?, ?, ?, 0, 0, 0)''', (name, period, self.__username, date.today()))
+                self.__db.execute('''INSERT INTO habits VALUES(NULL, ?, ?, ?, ?, 0, 0, 0)''', (name, period, self.__username, entry_date))
                 #Commit the changes
                 self.__connection.commit()
                 #Success message
@@ -52,7 +65,6 @@ class Habit(object):
         else:
             print("Incorrect period")
 
-        #Close the connection
         self.__connection.close()          
         
     #Method for deleting a habit
@@ -78,9 +90,10 @@ class Habit(object):
             print("The habit " + name + " does not exists")
         
     #Method for checking a habit
-    def check(self, name):
+    def check(self, name, entry_date = date.today()):
     
-        entry_date = date.today()
+        #Ensure the correct date for normal program execution
+        entry_date = self.__filter_date(entry_date)
 
         #Check if the habit exists
         if self.__check_existence(name):

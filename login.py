@@ -2,11 +2,12 @@
 import fire
 import os
 
-#Class for storing and returning user credentials
-class User(object):
+#Class for wrapping user-related functions
+class User():
     
     #Store an username in the credentials.txt file
-    def login(self, username):
+    @staticmethod
+    def login(username):
         credentials = open("credentials.txt", "w")
         credentials.write(username)
         credentials.close()
@@ -25,7 +26,8 @@ class User(object):
             print("No user logged in")
         
     #Delete the username from the credentials.txt file
-    def logout(self):
+    @staticmethod
+    def logout():
         #Check if the database file exists and delete it
         if os.path.exists("credentials.txt"):
             os.remove("credentials.txt")
