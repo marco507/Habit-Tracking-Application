@@ -69,18 +69,19 @@ class Analytics():
         
     @staticmethod
     def similar():
-        # 1. Query all data of the logged in user with the __select_data function
-        # 2. With a list comprehension create a new list containing only the daily habits
-        # 4. With a list comprehension create a new list containing only the daily habits
-        # 5. Print the results to the terminal
-        print("Daily Habits: " + str([i[1] for i in Analytics.__select_data() if i[2] == "Daily"]) +
-         "\nWeekly Habits: " + str([i[1] for i in Analytics.__select_data() if i[2] == "Weekly"]))
+            # 1. Query all data of the logged in user with the __select_data function
+            # 2. With a list comprehension create a new list containing only the daily habits
+            # 4. With a list comprehension create a new list containing only the daily habits
+            # 5. Print the results to the terminal
+            print("Daily Habits: " + str([i[1] for i in Analytics.__select_data() if i[2] == "Daily"]) +
+            "\nWeekly Habits: " + str([i[1] for i in Analytics.__select_data() if i[2] == "Weekly"]))
 
     #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
     @staticmethod
     def longest(habit = None):
-        #Search for the longest streak overall
-            if not habit:
+        
+            #Search for the longest streak overall
+            def longest_streak_overall():
                 #Define a function for generating a list of all "LongestStreak" values
                 def streak_list(dataset):
                     return [i[6] for i in dataset]
@@ -101,17 +102,27 @@ class Analytics():
                 print("Habit: " + str(return_habit(habit_list(Analytics.__select_data()), streak_list(Analytics.__select_data()), max_streak(streak_list(Analytics.__select_data())))) +
                 "\nStreak: " + str(max_streak(streak_list(Analytics.__select_data()))))
 
-            else:
-                #Check if the habit exists in the database
-                if Analytics.__check_existence(habit):
+            def longest_streak_habit(habit):
+                
+                def return_streak(habit):
                     # 1. Query all data of the logged in user with the __select_data function
                     # 2. Extract the relevant data with a list comprehension
                     # 3. Print the result to the terminal
-                    print("The longest streak for " + habit + " is " + str([i[6] for i in Analytics.__select_data() if i[1] == habit ][0]) + " days")
-                
-                #If the habit does not exist return an error message    
-                else:
-                    print("The habit " + habit + " does not exist in the database")  
+                    print("The longest streak for " + habit + " is " + str([i[6] for i in Analytics.__select_data() if i[1] == habit][0]) + " days")
+
+                def exit_function():
+                    #Give back an error message if the habit does not exist
+                    print("The habit " + habit + " does not exist in the database") 
+
+                #Check if the habit exists in the database
+                exit_function() if not Analytics.__check_existence(habit) else return_streak(habit) 
+
+            #Give back an error message if the database is empty
+            def exit_function():
+                print("The database is empty")
+
+            #Call a function according to the given argument and database condition
+            exit_function() if not Analytics.__select_data() else (longest_streak_overall() if habit == None else longest_streak_habit(habit))
 
     
 
