@@ -137,6 +137,9 @@ class Database(object):
             testdata = classes.Habit()
             testdata.check(i, end_date)
 
+        #Logout
+        login.User.logout()
+
 if __name__ == "__main__":
     #Expose the database class to the command line
     fire.Fire(Database)

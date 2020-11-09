@@ -23,7 +23,7 @@ class Habit(object):
 
     #Helper function for extracting a single value from a returned SELECT query
     def __extract_value(self):
-    #Extracting the numeric value from the returned list of tuples
+    #Extracting the value from the returned list of tuples
         result = self.__db.fetchall()
         for i in result:
             for j in i:
