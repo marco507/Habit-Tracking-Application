@@ -7,7 +7,7 @@ import login
 class Analytics():
 
     @staticmethod
-    def show():
+    def show_db():
         #Establish DB connection
         connection = sqlite3.connect('database.db')
 
@@ -18,7 +18,7 @@ class Analytics():
         connection.close()          
 
     @staticmethod
-    def tracking():
+    def show_tracking():
         #Establish DB connection
         connection = sqlite3.connect('database.db')
 
@@ -28,53 +28,70 @@ class Analytics():
         #Close the connection
         connection.close()  
 
-    #Helper function for querying all user related data
+    #Helper function for querying all user related data and checking if the database is empty
     @staticmethod
     def __select_data():
-        #Connect to the database and create a cursor
-        connection = connection = sqlite3.connect('database.db')
-        db = connection.cursor()
         
-        #Query all data related to the actual user without specific conditions
-        db.execute('''SELECT * FROM habits WHERE User = ?''', (login.User.whoami(),))
-        result = db.fetchall()
+        #Return a connection to the database
+        def connect_db():
+            return sqlite3.connect('database.db').cursor()
 
-        #Close the connection and return the query result
-        connection.close()
-        return result
+        def query_data(db, user):
+            return db.execute('''SELECT * FROM habits WHERE User = ?''', (user,))
+
+        def retrieve_data(db):
+            return db.fetchall()
+
+        return retrieve_data(query_data(connect_db(), login.User.whoami()))
+
 
     #Helper function for checking the existence of a habit
     @staticmethod
     def __check_existence(name):
-        #Connect to the database and create a cursor
-        connection = connection = sqlite3.connect('database.db')
-        db = connection.cursor()
+        
+        #Return a connection to the database
+        def connect_db():
+            return sqlite3.connect('database.db').cursor()
         
         #Search for the habit in the database
-        db.execute('''SELECT * FROM habits WHERE HabitName = ? AND User = ? ''', (name, login.User.whoami()))
-        exists = db.fetchall()
+        def query_data(db, user):
+            return db.execute('''SELECT * FROM habits WHERE HabitName = ? AND User = ? ''', (name, user))
 
-        #Close the connection and return the query result
-        connection.close()
-        return exists
+        def retrieve_data(db):
+            return db.fetchall()
+ 
+        return retrieve_data(query_data(connect_db(), login.User.whoami())) 
+
+    #Helper function for returning an error messagepy
+    @staticmethod
+    def __exit_function():
+        print("No data")
 
 
     #Function for printing all habits of the logged in user
     @staticmethod
     def all():
         # 1. Query all data of the logged in user with the __select_data function
-        # 2. With a list comprehension create a new list containing only the habits (Habits always have the same index)
+        # 2. With a list comprehension create a new list containing only the habits (Attributes always have the same index)
         # 3. Print the results to the terminal
-        print([i[1] for i in Analytics.__select_data()])
+        def return_habits(dataset):
+            print("User: " + login.User.whoami() + "\nHabits: " + str([i[1] for i in dataset]))
+
+        #Check if the database is not empty and call the corresponding function
+        return_habits(Analytics.__select_data()) if Analytics.__select_data() else Analytics.__exit_function()
         
     @staticmethod
     def similar():
-            # 1. Query all data of the logged in user with the __select_data function
-            # 2. With a list comprehension create a new list containing only the daily habits
-            # 4. With a list comprehension create a new list containing only the daily habits
-            # 5. Print the results to the terminal
-            print("Daily Habits: " + str([i[1] for i in Analytics.__select_data() if i[2] == "Daily"]) +
-            "\nWeekly Habits: " + str([i[1] for i in Analytics.__select_data() if i[2] == "Weekly"]))
+        # 1. Query all data of the logged in user with the __select_data function
+        # 2. With a list comprehension create a new list containing only the daily habits
+        # 4. With a list comprehension create a new list containing only the daily habits
+        # 5. Print the results to the terminal
+        def return_similar_habits(dataset):
+            print("Daily Habits: " + str([i[1] for i in dataset if i[2] == "Daily"]) +
+            "\nWeekly Habits: " + str([i[1] for i in dataset if i[2] == "Weekly"]))
+
+        #Check if the database is not empty and call the corresponding function
+        return_similar_habits(Analytics.__select_data()) if Analytics.__select_data() else Analytics.__exit_function()
 
     #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
     @staticmethod
@@ -103,32 +120,62 @@ class Analytics():
                 "\nStreak: " + str(max_streak(streak_list(Analytics.__select_data()))))
 
             def longest_streak_habit(habit):
-                
+                # 1. Query all data of the logged in user with the __select_data function
+                # 2. Extract the relevant data with a list comprehension
+                # 3. Print the result to the terminal
                 def return_streak(habit):
-                    # 1. Query all data of the logged in user with the __select_data function
-                    # 2. Extract the relevant data with a list comprehension
-                    # 3. Print the result to the terminal
-                    print("The longest streak for " + habit + " is " + str([i[6] for i in Analytics.__select_data() if i[1] == habit][0]) + " days")
-
-                def exit_function():
-                    #Give back an error message if the habit does not exist
-                    print("The habit " + habit + " does not exist in the database") 
+                    print("Habit: " + habit + "\nLongest Streak: " + str([i[6] for i in Analytics.__select_data() if i[1] == habit][0])) 
 
                 #Check if the habit exists in the database
-                exit_function() if not Analytics.__check_existence(habit) else return_streak(habit) 
-
-            #Give back an error message if the database is empty
-            def exit_function():
-                print("The database is empty")
+                Analytics.__exit_function() if not Analytics.__check_existence(habit) else return_streak(habit) 
 
             #Call a function according to the given argument and database condition
-            exit_function() if not Analytics.__select_data() else (longest_streak_overall() if habit == None else longest_streak_habit(habit))
+            Analytics.__exit_function() if not Analytics.__select_data() else (longest_streak_overall() if habit == None else longest_streak_habit(habit))
 
-    
+    #Return the current streak of a given habit
+    @staticmethod
+    def current(habit):
+        # 1. Query all data of the logged in user with the __select_data function
+        # 2. Extract the relevant data with a list comprehension
+        # 3. Print the result to the terminal
+        def return_streak(habit, dataset):
+            print("Habit: " + habit + "\nStreak: " + str([i[5] for i in Analytics.__select_data() if i[1] == habit][0]))
 
+        #Check if the database is not empty and call the corresponding function
+        return_streak(habit, Analytics.__select_data()) if Analytics.__check_existence(habit) else Analytics.__exit_function()
 
-            
+    #Function for returning a habits tracking data
+    @staticmethod
+    def tracking(habit):
         
-        
+        #Return the given habits id
+        def return_habit_id(habit, dataset):
+            return [i[0] for i in dataset if i[1] == habit][0]
 
-        
+        #Return all tracking data
+        def return_tracking(habit_id):
+            #Return a connection to the database
+            def connect_db():
+                return sqlite3.connect('database.db').cursor()
+
+            #Query all tracking data
+            def query_data(db, habit_id):
+                return db.execute('''SELECT * FROM trackingdata WHERE HabitID = ?''', (habit_id,))
+
+            #Retrieve the data from the cursor
+            def retrieve_data(db):
+                return db.fetchall()
+
+            #Return the dataset
+            return retrieve_data(query_data(connect_db(), return_habit_id(habit, Analytics.__select_data())))
+
+        def pretty_print(dataset):
+            print("Habit: " + habit + "\nTracking Data: ")
+            for i in dataset:
+                print(i[1])
+
+        #Print the tracking data entries to the terminal if the habit exists
+        pretty_print(return_tracking(return_habit_id(habit, Analytics.__select_data()))) if Analytics.__check_existence(habit) else Analytics.__exit_function()
+
+
+
