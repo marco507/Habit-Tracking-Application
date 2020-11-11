@@ -3,10 +3,10 @@ import pandas as pd
 import sqlite3
 import login
 
-#Helper functions
+#   ------------------Helper Functions------------------
 
 #Helper function for establishing a database connection
-def return_connection():
+def connect_db():
     return sqlite3.connect('database.db').cursor()
     
 #Helper function for retrieving data from a database cursor
@@ -20,28 +20,33 @@ def return_index(attribute, db):
     def query_metadata(db):
         return db.execute('pragma table_info(habits)')
 
-    #Extract the given attributes index with a list comprehension
+    #Extract the given attributes index with a list comprehension i[1] is the attribute name
     return [i[1] for i in retrieve_data(query_metadata(db))].index(str(attribute))
 
 #Helper function for querying all user related data and checking if the database is empty
 def select_data():
     
-    #Return a connection to the database
-    def connect_db():
-        return sqlite3.connect('database.db').cursor()
-
+    #Query all data for the logged in user
     def query_data(db, user):
         return db.execute('''SELECT * FROM habits WHERE User = ?''', (user,))
 
-    def retrieve_data(db):
-        return db.fetchall()
-
     return retrieve_data(query_data(connect_db(), login.User.whoami()))
 
+#Helper function for checking the existence of a habit
+def check_existence(habit):
+    
+    #Query the habit from the database
+    def query_data(db, user):
+        return db.execute('''SELECT * FROM habits WHERE HabitName = ? AND User = ? ''', (habit, user))
 
+    #Return the list, an empty list == False, a list with an entry == True
+    return retrieve_data(query_data(connect_db(), login.User.whoami())) 
 
+#Helper function for returning an error message
+def exit_function():
+    print("No data")
 
-
+#   ------------------CLI Functions------------------
 #Class for wrapping all functionality exposed to the user in a single namespace for fire
 class Analytics():
 
@@ -68,94 +73,78 @@ class Analytics():
         #Close the connection
         connection.close()  
     
-    
-
-    #Helper function for checking the existence of a habit
-    @staticmethod
-    def __check_existence(name):
-        
-        #Return a connection to the database
-        def connect_db():
-            return sqlite3.connect('database.db').cursor()
-        
-        #Search for the habit in the database
-        def query_data(db, user):
-            return db.execute('''SELECT * FROM habits WHERE HabitName = ? AND User = ? ''', (name, user))
-
-        def retrieve_data(db):
-            return db.fetchall()
- 
-        return retrieve_data(query_data(connect_db(), login.User.whoami())) 
-
-    #Helper function for returning an error messagepy
-    @staticmethod
-    def __exit_function():
-        print("No data")
-
-
-    #Function for printing all habits of the logged in user
+    #Function for returning all habits
     @staticmethod
     def all():
-        # 1. Query all data of the logged in user with the __select_data function
-        # 2. With a list comprehension create a new list containing only the habits (Attributes always have the same index)
-        # 3. Print the results to the terminal
+        ''' Function that lists all tracked habits of the logged-in user '''
+
+        # 1. Query all data of the logged in user with the select_data function
+        # 2. With a list comprehension create a new list containing only the habits
         def return_habits(dataset):
             print("User: " + login.User.whoami() + "\nHabits: " + str([i[1] for i in dataset]))
 
         #Check if the database is not empty and call the corresponding function
-        return_habits(Analytics.__select_data()) if Analytics.__select_data() else Analytics.__exit_function()
+        return_habits(select_data()) if select_data() else exit_function()
         
+    #Function for returning all habits with the same period
     @staticmethod
     def similar():
-        # 1. Query all data of the logged in user with the __select_data function
-        # 2. With a list comprehension create a new list containing only the daily habits
-        # 4. With a list comprehension create a new list containing only the daily habits
-        # 5. Print the results to the terminal
-        def return_similar_habits(dataset):
-            print("Daily Habits: " + str([i[1] for i in dataset if i[2] == "Daily"]) +
-            "\nWeekly Habits: " + str([i[1] for i in dataset if i[2] == "Weekly"]))
+        ''' Function that lists all habits grouped by period '''
+
+        #Query all data from the habits table and return the daily habits with a list comprehension
+        def return_daily_habits(dataset):
+            print("Daily Habits: " + str([i[return_index("HabitName", connect_db())] for i in dataset if i[return_index("Period", connect_db())] == "Daily"]))
+        
+        #Query all data from the habits table and return the weekly habits with a list comprehension
+        def return_weekly_habits(dataset):   
+            print("Weekly Habits: " + str([i[return_index("HabitName", connect_db())] for i in dataset if i[return_index("Period", connect_db())] == "Weekly"]))
+
+        def return_habits():
+            return_daily_habits(select_data())
+            return_weekly_habits(select_data())  
 
         #Check if the database is not empty and call the corresponding function
-        return_similar_habits(Analytics.__select_data()) if Analytics.__select_data() else Analytics.__exit_function()
+        return_habits() if select_data() else exit_function()
 
     #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
     @staticmethod
     def longest(habit = None):
+        ''' Function that returns the longest streak overall or of a given habit
+
+            Arguments:
+            No argument - The function returns the longest streak overall
+            habit(string) - The function returns the longest streak of a habit 
+        ''' 
         
-            #Search for the longest streak overall
-            def longest_streak_overall():
-                #Define a function for generating a list of all "LongestStreak" values
-                def streak_list(dataset):
-                    return [i[6] for i in dataset]
+        #Search for the longest streak overall
+        def longest_streak_overall(dataset):
+            #Return the "LongestStreak" values from the dataset with a list comprehension
+            def streak_list(dataset):
+                return [i[return_index("LongestStreak", connect_db())] for i in dataset]
 
-                #Define a function for generating a list of all habits
-                def habit_list(dataset):
-                    return [i[1] for i in dataset]
+            #Return the "HabitName" values from the dataset with a list comprehension
+            def habit_list(dataset):
+                return [i[return_index("HabitName", connect_db())] for i in dataset]
 
-                #Define a function for finding the longest streak
-                def max_streak(streaks):
-                    return max(streaks)
+            #Define a function for finding the longest streaks corresponding habit
+            def return_habit(habits, streaks, longest):
+                return habits[streaks.index(longest)]
+            
+            #Print the result to the terminal
+            print("Habit: " + str(return_habit(habit_list(dataset), streak_list(dataset), max(streak_list(dataset)))) +
+                "\nStreak: " + str(max(streak_list(dataset))))
 
-                #Define a function for finding the longest streaks corresponding habit
-                def return_habit(habits, streaks, longest):
-                    return habits[streaks.index(longest)]
-                
-                #Print the result to the terminal
-                print("Habit: " + str(return_habit(habit_list(Analytics.__select_data()), streak_list(Analytics.__select_data()), max_streak(streak_list(Analytics.__select_data())))) +
-                "\nStreak: " + str(max_streak(streak_list(Analytics.__select_data()))))
+        def longest_streak_habit(habit, dataset):
+            #Query all data of the logged in user with the select_data function and return the "LongestStreak" value with a list comprehension
+            def return_streak(habit, dataset):
+                print("Habit: " + habit + 
+                "\nLongest Streak: " + str([i[return_index("LongestStreak", connect_db())] for i in dataset if i[return_index("HabitName", connect_db())] == habit][0]))
 
-            def longest_streak_habit(habit):
-                # 1. Query all data of the logged in user with the __select_data function
-                # 2. Extract the relevant data with a list comprehension
-                # 3. Print the result to the terminal
-                def return_streak(habit):
-                    print("Habit: " + habit + "\nLongest Streak: " + str([i[6] for i in Analytics.__select_data() if i[1] == habit][0])) 
+            #Check if the habit exists in the database
+            exit_function() if not check_existence(habit) else return_streak(habit, dataset) 
 
-                #Check if the habit exists in the database
-                Analytics.__exit_function() if not Analytics.__check_existence(habit) else return_streak(habit) 
-
-            #Call a function according to the given argument and database condition
-            Analytics.__exit_function() if not Analytics.__select_data() else (longest_streak_overall() if habit == None else longest_streak_habit(habit))
+        #Call a function according to the given argument and database condition
+        exit_function() if not select_data() else (longest_streak_overall(select_data()) if habit == None else longest_streak_habit(habit, select_data()))
 
     #Return the current streak of a given habit
     @staticmethod
