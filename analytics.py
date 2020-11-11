@@ -3,9 +3,49 @@ import pandas as pd
 import sqlite3
 import login
 
-#Class for combining all functions in a single namespace
+#Helper functions
+
+#Helper function for establishing a database connection
+def return_connection():
+    return sqlite3.connect('database.db').cursor()
+    
+#Helper function for retrieving data from a database cursor
+def retrieve_data(db):
+    return db.fetchall()
+
+#Helper function for returning the index postion of the habits tables attributes
+def return_index(attribute, db):
+
+    #Query the habits table metadata
+    def query_metadata(db):
+        return db.execute('pragma table_info(habits)')
+
+    #Extract the given attributes index with a list comprehension
+    return [i[1] for i in retrieve_data(query_metadata(db))].index(str(attribute))
+
+#Helper function for querying all user related data and checking if the database is empty
+def select_data():
+    
+    #Return a connection to the database
+    def connect_db():
+        return sqlite3.connect('database.db').cursor()
+
+    def query_data(db, user):
+        return db.execute('''SELECT * FROM habits WHERE User = ?''', (user,))
+
+    def retrieve_data(db):
+        return db.fetchall()
+
+    return retrieve_data(query_data(connect_db(), login.User.whoami()))
+
+
+
+
+
+#Class for wrapping all functionality exposed to the user in a single namespace for fire
 class Analytics():
 
+    #Testfunktionen    
     @staticmethod
     def show_db():
         #Establish DB connection
@@ -27,23 +67,8 @@ class Analytics():
 
         #Close the connection
         connection.close()  
-
-    #Helper function for querying all user related data and checking if the database is empty
-    @staticmethod
-    def __select_data():
-        
-        #Return a connection to the database
-        def connect_db():
-            return sqlite3.connect('database.db').cursor()
-
-        def query_data(db, user):
-            return db.execute('''SELECT * FROM habits WHERE User = ?''', (user,))
-
-        def retrieve_data(db):
-            return db.fetchall()
-
-        return retrieve_data(query_data(connect_db(), login.User.whoami()))
-
+    
+    
 
     #Helper function for checking the existence of a habit
     @staticmethod
@@ -176,6 +201,10 @@ class Analytics():
 
         #Print the tracking data entries to the terminal if the habit exists
         pretty_print(return_tracking(return_habit_id(habit, Analytics.__select_data()))) if Analytics.__check_existence(habit) else Analytics.__exit_function()
+
+    #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
+
+    #def breaks
 
 
 
