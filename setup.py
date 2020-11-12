@@ -7,19 +7,20 @@ import classes
 from random import randint, choice
 from datetime import date, datetime, timedelta
 
-class Database(object):
-
-    def __init__(self):
-        #Establish the database connection and cursor
-        self.__connection = sqlite3.connect('database.db')
-        self.__db = self.__connection.cursor() 
+class Database():
     
     #Method for the initialisation of the database by creating all default tables
-    def initialize(self):
+    @staticmethod
+    def initialize():
+        
+        #Create a database and a cursor object
+        connection = sqlite3.connect('database.db')
+        db = connection.cursor()
+        
         #Try to create the database tables if the do not already exist
         try:
             # Create a table for storing Habits
-            self.__db.execute("""CREATE TABLE habits (
+            db.execute("""CREATE TABLE habits (
                 HabitID INTEGER PRIMARY KEY,
                 HabitName TEXT NOT NULL,
                 Period TEXT NOT NULL,
@@ -32,7 +33,7 @@ class Database(object):
             """)
 
             #Create a table for storing tracking data
-            self.__db.execute("""CREATE TABLE trackingdata (
+            db.execute("""CREATE TABLE trackingdata (
                 DataID INTEGER PRIMARY KEY,
                 CheckDate DATE NOT NULL,
                 HabitID INTEGER NOT NULL,
@@ -41,7 +42,7 @@ class Database(object):
             """)
 
             #Commit the changes
-            self.__connection.commit()
+            connection.commit()
 
             #Print a success message
             print("Database initalized")
@@ -52,12 +53,11 @@ class Database(object):
 
         finally:
             #Close the database connection
-            self.__connection.close()
+            connection.close()
         
     #Method for deleting the database
-    def delete(self):
-        #Close the database connection
-        self.__connection.close()
+    @staticmethod
+    def delete():
         #Check if the database file exists and delete it
         if os.path.exists("database.db"):
             os.remove("database.db")

@@ -4,7 +4,6 @@ import login
 import analytics
 from datetime import date, timedelta, datetime
 
-
 #Class for creating, deleting and checking habits.
 class Habit(object):
        
@@ -14,6 +13,8 @@ class Habit(object):
         #Establish the database connection and cursor
         self.__connection = sqlite3.connect('database.db')
         self.__db = self.__connection.cursor() 
+
+#   ------------------Helper Functions------------------
 
     #Helper function for checking if a habit exist in a database
     def __check_existence(self, name):
@@ -38,6 +39,7 @@ class Habit(object):
             #Return the date given as argument back
             return entry_date
 
+#   ------------------CLI Functions------------------
 
     #Method for creating and storing a habit in the Database
     def create(self, name, period, entry_date = date.today):

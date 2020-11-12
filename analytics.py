@@ -78,10 +78,9 @@ class Analytics():
     def all():
         ''' Function that lists all tracked habits of the logged-in user '''
 
-        # 1. Query all data of the logged in user with the select_data function
-        # 2. With a list comprehension create a new list containing only the habits
+        #Query all data from the habits table and return the habits with a list comprehension
         def return_habits(dataset):
-            print("User: " + login.User.whoami() + "\nHabits: " + str([i[1] for i in dataset]))
+            print("User: " + login.User.whoami() + "\nHabits: " + str([i[return_index("HabitName", connect_db())] for i in dataset]))
 
         #Check if the database is not empty and call the corresponding function
         return_habits(select_data()) if select_data() else exit_function()
@@ -109,12 +108,7 @@ class Analytics():
     #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
     @staticmethod
     def longest(habit = None):
-        ''' Function that returns the longest streak overall or of a given habit
-
-            Arguments:
-            No argument - The function returns the longest streak overall
-            habit(string) - The function returns the longest streak of a habit 
-        ''' 
+        ''' Function that returns the longest streak overall or of a given habit ''' 
         
         #Search for the longest streak overall
         def longest_streak_overall(dataset):
@@ -138,7 +132,7 @@ class Analytics():
             #Query all data of the logged in user with the select_data function and return the "LongestStreak" value with a list comprehension
             def return_streak(habit, dataset):
                 print("Habit: " + habit + 
-                "\nLongest Streak: " + str([i[return_index("LongestStreak", connect_db())] for i in dataset if i[return_index("HabitName", connect_db())] == habit][0]))
+                    "\nLongest Streak: " + str([i[return_index("LongestStreak", connect_db())] for i in dataset if i[return_index("HabitName", connect_db())] == habit][0]))
 
             #Check if the habit exists in the database
             exit_function() if not check_existence(habit) else return_streak(habit, dataset) 
@@ -149,14 +143,15 @@ class Analytics():
     #Return the current streak of a given habit
     @staticmethod
     def current(habit):
-        # 1. Query all data of the logged in user with the __select_data function
-        # 2. Extract the relevant data with a list comprehension
-        # 3. Print the result to the terminal
+        ''' Function that returns the current streak of a given habit '''
+
+        #Query all data of the logged in user with the select_data function and return the "CurrentStreak" value with a list comprehension
         def return_streak(habit, dataset):
-            print("Habit: " + habit + "\nStreak: " + str([i[5] for i in Analytics.__select_data() if i[1] == habit][0]))
+            print("Habit: " + habit + 
+                "\nStreak: " + str([i[return_index("CurrentStreak", connect_db())] for i in select_data() if i[return_index("HabitName", connect_db())] == habit][0]))
 
         #Check if the database is not empty and call the corresponding function
-        return_streak(habit, Analytics.__select_data()) if Analytics.__check_existence(habit) else Analytics.__exit_function()
+        return_streak(habit, select_data()) if check_existence(habit) else exit_function()
 
     #Function for returning a habits tracking data
     @staticmethod
@@ -164,36 +159,47 @@ class Analytics():
         
         #Return the given habits id
         def return_habit_id(habit, dataset):
-            return [i[0] for i in dataset if i[1] == habit][0]
+            return [i[return_index("HabitID", connect_db())] for i in dataset if i[return_index("HabitName", connect_db())] == habit][0]
 
         #Return all tracking data
         def return_tracking(habit_id):
-            #Return a connection to the database
-            def connect_db():
-                return sqlite3.connect('database.db').cursor()
-
+        
             #Query all tracking data
-            def query_data(db, habit_id):
+            def query_tracking_data(db, habit_id):
                 return db.execute('''SELECT * FROM trackingdata WHERE HabitID = ?''', (habit_id,))
 
-            #Retrieve the data from the cursor
-            def retrieve_data(db):
-                return db.fetchall()
-
             #Return the dataset
-            return retrieve_data(query_data(connect_db(), return_habit_id(habit, Analytics.__select_data())))
+            return retrieve_data(query_tracking_data(connect_db(), return_habit_id(habit, select_data())))
 
+        #Print the tracking date entries with the help of a for loop
         def pretty_print(dataset):
             print("Habit: " + habit + "\nTracking Data: ")
             for i in dataset:
                 print(i[1])
 
         #Print the tracking data entries to the terminal if the habit exists
-        pretty_print(return_tracking(return_habit_id(habit, Analytics.__select_data()))) if Analytics.__check_existence(habit) else Analytics.__exit_function()
+        pretty_print(return_tracking(return_habit_id(habit, select_data()))) if check_existence(habit) else exit_function()
 
-    #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
+    #Function for returning all habits with a streak break and the number of streak breaks
+    def breaks(habit):
+        ''' Function that returns all habits with streak break and the habits number of streak breaks '''
 
-    #def breaks
+        #Return the "HabitName" values from the dataset with a list comprehension
+        def habit_list(dataset):
+            return [i[return_index("HabitName", connect_db())] for i in dataset]
 
+        #Return the "Breaks" values from the dataset with a list comprehension
+        def breaks_list(dataset):
+            return [i[return_index("Breaks", connect_db())] for i in dataset]
 
+        #Return a dictionary with a dictionary comprehension containing all habits with streak breaks
+        def return_dictionary(breaks_list, habit_list):
+            return {k: v for k,v in zip(habit_list, breaks_list) if v > 0}
 
+        #Print the tracking data with the help of a for loop
+        def pretty_print(dictionary):
+            for i in dictionary:
+                print("Habit : {} \t Breaks : {}".format(i,dictionary[i]))
+
+        #Print the tracking data entries to the terminal if the habit exists
+        pretty_print(return_dictionary(breaks_list(select_data()), habit_list(select_data()))) if select_data() else exit_function()
