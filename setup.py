@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 
 class Database():
     
-    #Method for the initialisation of the database by creating all default tables
+    #Function for the initialisation of the database by creating all default tables
     @staticmethod
     def initialize():
         
@@ -55,7 +55,7 @@ class Database():
             #Close the database connection
             connection.close()
         
-    #Method for deleting the database
+    #Function for deleting the database
     @staticmethod
     def delete():
         #Check if the database file exists and delete it
@@ -66,7 +66,7 @@ class Database():
         else:
             print("Database don't exist")
 
-    #Method for inserting the default data
+    #Function for inserting the default data
     @staticmethod
     def testdata():
         #Define the default habits

@@ -12,7 +12,7 @@ class Habit(object):
         self.__username = login.User.whoami()
         #Establish the database connection and cursor
         self.__connection = sqlite3.connect('database.db')
-        self.__db = self.__connection.cursor() 
+        self.__db = self.__connection.cursor()  
 
 #   ------------------Helper Functions------------------
 
@@ -42,10 +42,17 @@ class Habit(object):
 #   ------------------CLI Functions------------------
 
     #Method for creating and storing a habit in the Database
-    def create(self, name, period, entry_date = date.today):
+    def create(self, name, period, entry_date = date.today()):
 
         #Ensure the correct date for normal program execution
-        entry_date = self.__filter_date(entry_date)
+        #Helper function that prevents real users from manipulating date values 
+        def __filter_date(self, entry_date):
+            if self.__username != "testuser":
+                #Return todays date
+                return date.today()
+            else:
+                #Return the date given as argument back
+                return entry_date
         
         #Check if the period value is correct
         if period == "Daily" or period == "Weekly":    
