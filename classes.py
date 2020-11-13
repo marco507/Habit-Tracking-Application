@@ -32,7 +32,7 @@ class Habit(object):
 
     #Helper function that prevents real users from manipulating date values 
     def __filter_date(self, entry_date):
-        if self.__username != "test_user":
+        if self.__username != "testuser":
             #Return todays date
             return date.today()
         else:

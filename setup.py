@@ -81,7 +81,7 @@ class Database():
         default_date = date(2020, 10, 1)
 
         #Login as test_user
-        login.User.login("test_user")
+        login.User.login("testuser")
         
         #Insert the default habits with Habit.create() method
         for i in default_habits:
