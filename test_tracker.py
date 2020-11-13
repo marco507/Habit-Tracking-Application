@@ -5,45 +5,17 @@ import login
 import sqlite3
 from datetime import date
 
-#Establish a virtual database connection and create tables for testing
-connection = sqlite3.connect(':memory:')
-db = connection.cursor()
-
-db.execute("""CREATE TABLE habits (
-    HabitID INTEGER PRIMARY KEY,
-    HabitName TEXT NOT NULL,
-    Period TEXT NOT NULL,
-    User TEXT NOT NULL,
-    CreationDate DATE NOT NULL,
-    CurrentStreak INTEGER NOT NULL,
-    LongestStreak INTEGER NOT NULL,
-    Breaks INTEGER NOT NULL
-)
-""")
-
-#Create a table for storing tracking data
-db.execute("""CREATE TABLE trackingdata (
-    DataID INTEGER PRIMARY KEY,
-    CheckDate DATE NOT NULL,
-    HabitID INTEGER NOT NULL,
-    FOREIGN KEY (HabitID) REFERENCES habits(HabitID) ON DELETE CASCADE
-)
-""")
-
-
-
 class TestClasses(unittest.TestCase):
 
     #Define all necessary settings in setUp
     def setUp(self):
         #Login as test_user
-        login.User.login("testuser")
-        
-        
-
+        login.User.login("unittest")
+        self.db = sqlite3.connect('database.db').cursor()
+    
     #Helper function that queries a habit data entry
     def select_data(self, habitname):
-        habit.db.execute('''SELECT HabitName FROM habits WHERE HabitName = ?''', (habitname,))
+        self.db.execute('''SELECT HabitName FROM habits WHERE HabitName = ?''', (habitname,))
         result = self.db.fetchall()
         return result[0][0]
 
@@ -55,16 +27,8 @@ class TestClasses(unittest.TestCase):
         #Enter a predefined habit with the create method
         habit.create("Daily-Habit", "Daily")
 
-        
-        
-
-
-    
-
-    
-
-
-        
+        #Search for the inserted habit from the Database and check if the values match
+        self.assertEqual("Daily-Habit", self.select_data("Daily-Habit"))
 
 if __name__ == "__main__":
     unittest.main()
