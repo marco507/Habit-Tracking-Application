@@ -37,7 +37,7 @@ class Database():
                 DataID INTEGER PRIMARY KEY,
                 CheckDate DATE NOT NULL,
                 HabitID INTEGER NOT NULL,
-                FOREIGN KEY (HabitID) REFERENCES habits(HabitID)
+                FOREIGN KEY (HabitID) REFERENCES habits(HabitID) ON DELETE CASCADE
             )
             """)
 
@@ -136,9 +136,6 @@ class Database():
             #Set the last tracking entry at the end date (31.10.2020)
             testdata = classes.Habit()
             testdata.check(i, end_date)
-
-        #Logout
-        login.User.logout()
 
 if __name__ == "__main__":
     #Expose the database class to the command line
