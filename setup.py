@@ -44,6 +44,9 @@ class Database():
             #Commit the changes
             connection.commit()
 
+            #Close the database connection
+            connection.close()
+
             #Print a success message
             print("Database initalized")
 
@@ -51,10 +54,6 @@ class Database():
             #Print an error message
             print("Database already initialized")
 
-        finally:
-            #Close the database connection
-            connection.close()
-        
     #Function for deleting the database
     @staticmethod
     def delete():
@@ -82,10 +81,12 @@ class Database():
 
         #Login as test_user
         login.User.login("testuser")
+
+        #Create a new instane of the Habit() class
+        testdata = classes.Habit()
         
         #Insert the default habits with Habit.create() method
         for i in default_habits:
-            testdata = classes.Habit()
             testdata.create(i, default_habits[i], default_date)
 
         #Insert random generated tracking data with the Habit.check() method
@@ -109,7 +110,6 @@ class Database():
             #Fill in the tracking data
             while entry_date < end_date:
                 #Check the habit at the entry_date
-                testdata = classes.Habit()
                 testdata.check(i, entry_date)
                 
                 #Generate new random date
@@ -134,7 +134,6 @@ class Database():
                         entry_date = entry_date + timedelta(days=randint(4,6))
 
             #Set the last tracking entry at the end date (31.10.2020)
-            testdata = classes.Habit()
             testdata.check(i, end_date)
 
 if __name__ == "__main__":

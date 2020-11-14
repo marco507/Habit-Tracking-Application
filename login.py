@@ -20,7 +20,7 @@ class User():
         if os.path.exists("credentials.txt"):
             credentials = open("credentials.txt", "r")
             user = credentials.read()
-            credentials.close
+            credentials.close()
             return user
         else:
             print("No user logged in")
