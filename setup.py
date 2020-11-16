@@ -142,6 +142,9 @@ class Database():
         #Logout
         login.User.logout()
 
+        #Print a success message
+        print("Entered default data")
+
 if __name__ == "__main__":
     #Expose the database class to the command line
     fire.Fire(Database)

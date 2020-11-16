@@ -11,7 +11,9 @@ class User():
         credentials = open("credentials.txt", "w")
         credentials.write(username)
         credentials.close()
-        print("Logged in succesfully")
+        #Print a succes message only if a real user logs in
+        if username != "testuser":
+            print("Logged in succesfully")
         
     #Give back the current user
     @staticmethod
@@ -30,8 +32,13 @@ class User():
     def logout():
         #Check if the database file exists and delete it
         if os.path.exists("credentials.txt"):
+            #Capture the last username
+            username = User.whoami()
+            #Delete the credentials file
             os.remove("credentials.txt")
-            print("Logged out succesfully")
+            #Print a message only when a real user is logged in
+            if username != "testuser":
+                print("Logged out succesfully")
         else:
             print("No user logged in")
         

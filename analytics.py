@@ -34,20 +34,6 @@ def select_data():
 
     return retrieve_data(query_data(connect_db(), login.User.whoami()))
 
-#Helper function for checking the existence of a habit
-def check_existence(habit):
-    
-    #Query the habit from the database
-    def query_data(db, user):
-        return db.execute('''SELECT * FROM habits WHERE HabitName = ? AND User = ? ''', (habit, user))
-
-    #Return the list, an empty list == False, a list with an entry == True
-    return retrieve_data(query_data(connect_db(), login.User.whoami())) 
-
-#Helper function for returning an error message
-def exit_function():
-    print("No data")
-
 #   ------------------CLI Functions------------------
 #Class for wrapping all functionality exposed to the user in a single namespace for fire
 class Analytics():
