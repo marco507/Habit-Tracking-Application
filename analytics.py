@@ -65,7 +65,7 @@ class Analytics():
     @staticmethod
     @user_message
     def all():
-        ''' Function that lists all tracked habits of the logged-in user '''
+        ''' Function that lists all tracked habits of the logged-in user ''' 
 
         return [i[return_index("HabitName", connect_db())] for i in select_data()]
         

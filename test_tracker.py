@@ -211,6 +211,3 @@ if __name__ == "__main__":
     unittest.main(exit = False)
     #Logout
     login.User.logout()
-
-
-
