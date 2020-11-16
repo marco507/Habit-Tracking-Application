@@ -2,8 +2,7 @@
 import pandas as pd
 import sqlite3
 import login
-from decorators import user_print
-from functools import reduce
+from decorators import user_message
 
 #   ------------------Helper Functions------------------
 
@@ -63,6 +62,7 @@ class Analytics():
     
     #Function for returning all habits
     @staticmethod
+    @user_message
     def all():
         ''' Function that lists all tracked habits of the logged-in user '''
 
@@ -70,6 +70,7 @@ class Analytics():
         
     #Function for returning all habits with the same period
     @staticmethod
+    @user_message
     def similar(period):
         ''' Function that lists all habits grouped by period '''
 
@@ -77,6 +78,7 @@ class Analytics():
 
     #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
     @staticmethod
+    @user_message
     def longest(habit = None):
         ''' Function that returns the longest streak overall or of a given habit ''' 
         
@@ -111,6 +113,7 @@ class Analytics():
 
     #Return the current streak of a given habit
     @staticmethod
+    @user_message
     def current(habit):
         ''' Function that returns the current streak of a given habit '''
 
@@ -119,6 +122,7 @@ class Analytics():
 
     #Function for returning a habits tracking data
     @staticmethod
+    @user_message
     def tracking(habit):
         
         #Return the given habits id
@@ -147,6 +151,7 @@ class Analytics():
 
     #Function for returning all habits with a streak break and the number of streak breaks
     @staticmethod
+    @user_message
     def breaks():
         ''' Function that returns all habits with streak break and the habits number of streak breaks '''
 

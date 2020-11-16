@@ -39,21 +39,14 @@ def capture_print(function):
             function(*args)
     return wrapper
 
-#Decorator for printing returned values of the analytics function to the terminal
-def user_print(function):
+#Decorator for giving the user a message when no data is found
+def user_message(function):
     def wrapper(*args):
-        #Return the current user
-        credentials = open("credentials.txt", "r")
-        user = credentials.read()
-        credentials.close()
-
-        return function(*args)
-        #If the programm is executed by a real user print the returned result to the terminal
-        #if user != "testuser":
-         #   return function(*args)
-        #If testuser is logged in only return the value
-        #else:
-         #   return function(*args)
+        try:
+            #If a function returns no value give the user a message else return the value of the function
+            return function(*args) if function(*args) else "No data"
+        except TypeError:
+            return "Incorrect command"
     return wrapper
 
          
