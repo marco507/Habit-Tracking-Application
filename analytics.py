@@ -2,6 +2,7 @@
 import pandas as pd
 import sqlite3
 import login
+from decorators import user_print
 
 #   ------------------Helper Functions------------------
 
@@ -78,32 +79,36 @@ class Analytics():
     def all():
         ''' Function that lists all tracked habits of the logged-in user '''
 
+        return [i[return_index("HabitName", connect_db())] for i in select_data()]
+
         #Query all data from the habits table and return the habits with a list comprehension
-        def return_habits(dataset):
-            print("User: " + login.User.whoami() + "\nHabits: " + str([i[return_index("HabitName", connect_db())] for i in dataset]))
+        #def return_habits(dataset):
+            #print("User: " + login.User.whoami() + "\nHabits: " + str([i[return_index("HabitName", connect_db())] for i in dataset]))
 
         #Check if the database is not empty and call the corresponding function
-        return_habits(select_data()) if select_data() else exit_function()
+        #return_habits(select_data()) if select_data() else exit_function()
         
     #Function for returning all habits with the same period
     @staticmethod
-    def similar():
+    def similar(period):
         ''' Function that lists all habits grouped by period '''
 
         #Query all data from the habits table and return the daily habits with a list comprehension
         def return_daily_habits(dataset):
-            print("Daily Habits: " + str([i[return_index("HabitName", connect_db())] for i in dataset if i[return_index("Period", connect_db())] == "Daily"]))
+            #print("Daily Habits: " + str([i[return_index("HabitName", connect_db())] for i in dataset if i[return_index("Period", connect_db())] == "Daily"]))
+            return [i[return_index("HabitName", connect_db())] for i in select_data() if i[return_index("Period", connect_db())] == "Daily"]
         
         #Query all data from the habits table and return the weekly habits with a list comprehension
         def return_weekly_habits(dataset):   
-            print("Weekly Habits: " + str([i[return_index("HabitName", connect_db())] for i in dataset if i[return_index("Period", connect_db())] == "Weekly"]))
+            #print("Weekly Habits: " + str([i[return_index("HabitName", connect_db())] for i in dataset if i[return_index("Period", connect_db())] == "Weekly"]))
+            return [i[return_index("HabitName", connect_db())] for i in select_data() if i[return_index("Period", connect_db())] == "Weekly"]
 
         def return_habits():
             return_daily_habits(select_data())
             return_weekly_habits(select_data())  
 
         #Check if the database is not empty and call the corresponding function
-        return_habits() if select_data() else exit_function()
+        return [i[return_index("HabitName", connect_db())] for i in select_data() if i[return_index("Period", connect_db())] == period]
 
     #Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
     @staticmethod

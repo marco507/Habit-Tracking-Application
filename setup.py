@@ -6,13 +6,15 @@ import login
 import classes
 from random import randint, choice
 from datetime import date, datetime, timedelta
+from decorators import capture_print
 
 class Database():
     
     #Function for the initialisation of the database by creating all default tables
     @staticmethod
+    @capture_print
     def initialize():
-        
+    
         #Create a database and a cursor object
         connection = sqlite3.connect('database.db')
         db = connection.cursor()
@@ -47,11 +49,11 @@ class Database():
             #Close the database connection
             connection.close()
 
-            #Print a success message
+            #Return a success message
             print("Database initalized")
 
         except sqlite3.OperationalError:
-            #Print an error message
+            #Return an error message
             print("Database already initialized")
 
     #Function for deleting the database
@@ -60,7 +62,7 @@ class Database():
         #Check if the database file exists and delete it
         if os.path.exists("database.db"):
             os.remove("database.db")
-            print("Database deleted")
+            return "Database deleted"
         #Return an error message if the DB file do not exist
         else:
             print("Database don't exist")
@@ -68,6 +70,7 @@ class Database():
     #Function for inserting the default data
     @staticmethod
     def testdata():
+            
         #Define the default habits
         default_habits = {
             "Workout" : "Daily",
@@ -79,9 +82,9 @@ class Database():
         #Define the creation date of the default habits as 01.10.2020
         default_date = date(2020, 10, 1)
 
-        #Login as test_user
+        #Login as testuser
         login.User.login("testuser")
-
+        
         #Create a new instane of the Habit() class
         testdata = classes.Habit()
         
@@ -135,6 +138,9 @@ class Database():
 
             #Set the last tracking entry at the end date (31.10.2020)
             testdata.check(i, end_date)
+
+        #Logout
+        login.User.logout()
 
 if __name__ == "__main__":
     #Expose the database class to the command line
