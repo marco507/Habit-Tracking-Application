@@ -37,9 +37,9 @@ def select_data():
 #Class for wrapping all functionality exposed to the user in a single namespace for fire
 class Analytics():
 
-    #Testfunktion   
+    #Testfunction that shows the habits table
     @staticmethod
-    def _show_db():
+    def _show_habits():
         #Establish DB connection
         connection = sqlite3.connect('database.db')
 
@@ -49,6 +49,7 @@ class Analytics():
         #Close the connection
         connection.close()          
 
+    #Testfunction that shows the trackingdata table 
     @staticmethod
     def _show_tracking():
         #Establish DB connection
@@ -153,7 +154,7 @@ class Analytics():
     @staticmethod
     @user_message
     def breaks():
-        ''' Function that returns all habits with streak break and the habits number of streak breaks '''
+        ''' Function that returns all habits with a streak break and the number of streak breaks '''
 
         #Return the "HabitName" values from the dataset with a list comprehension
         def habit_list(dataset):

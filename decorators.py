@@ -43,8 +43,8 @@ def capture_print(function):
 def user_message(function):
     def wrapper(*args):
         try:
-            #If a function returns no value give the user a message else return the value of the function
-            return function(*args) if function(*args) else "No data"
+            #If a function returns a empty value give the user a message else return the value of the
+            return function(*args) if any(function(*args)) else "No data"
         except TypeError:
             return "Incorrect command"
     return wrapper

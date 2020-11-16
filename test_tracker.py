@@ -1,5 +1,6 @@
 import unittest, sqlite3, os, io, sys
-import classes, setup, login, analytics
+import classes, setup, login
+from analytics import Analytics
 from datetime import date, timedelta
 
 class TestHabit(unittest.TestCase):
@@ -34,12 +35,6 @@ class TestHabit(unittest.TestCase):
         result = self.db.fetchall()
         return result
 
-    #Helper function that queries a habit data entry
-    def select_tracking(self, habit_id):
-        self.db.execute('''SELECT FROM trackingdata WHERE HabitID = ?''', (habit_id))
-        result = self.db.fetchall()
-        return result
-
     #Test for the create method
     def test_create(self):
         #Define the testdata to compare against
@@ -49,7 +44,7 @@ class TestHabit(unittest.TestCase):
         #Test an entry with a false period value and check the error message
         self.assertEqual("Incorrect period\n", self.test_habit.create("False-Period", "FalseValue"))
 
-        #Test to create a habit that already exists
+        #Try to create a habit that already exists
         #Create a test habit the first time
         self.test_habit.create("DoubleCreate", "Daily")
         #Create the habit the second time and capture the error message
@@ -60,8 +55,8 @@ class TestHabit(unittest.TestCase):
         self.test_habit.create("Weekly-Habit", "Weekly")
 
         #Search for the inserted habit from the Database and check if the values match the defined testdata
-        self.assertEqual(daily_habit, self.select_data("Daily-Habit")[0])
-        self.assertEqual(weekly_habit, self.select_data("Weekly-Habit")[0])
+        self.assertIn(daily_habit, self.select_data("Daily-Habit"))
+        self.assertIn(weekly_habit, self.select_data("Weekly-Habit"))
 
     #Test for the check method
     def test_check(self):
@@ -94,7 +89,7 @@ class TestHabit(unittest.TestCase):
         #Check the habit on the next day
         self.test_habit.check("IncreaseDaily", str(date(2020, 10, 2)))
         #Query the updated data entry in the habits table and compare it to the testdata
-        self.assertEqual(daily_streak_increase, self.select_data("IncreaseDaily")[0])
+        self.assertIn(daily_streak_increase, self.select_data("IncreaseDaily"))
 
         #Check a weekly habit increase of the longest and current streak
         #Insert the test entry
@@ -102,7 +97,7 @@ class TestHabit(unittest.TestCase):
         #Check the habit a week after creation
         self.test_habit.check("IncreaseWeekly", str(date(2020, 10, 7)))
         #Query the updated data entry in the habits table and compare it to the testdata
-        self.assertEqual(weekly_streak_increase, self.select_data("IncreaseWeekly")[0])
+        self.assertIn(weekly_streak_increase, self.select_data("IncreaseWeekly"))
 
         #Check a daily habit streak break
         #First insert a new habit
@@ -112,7 +107,7 @@ class TestHabit(unittest.TestCase):
         #Check the habit 2 days after to break the streak
         self.test_habit.check("BreakDaily", date(2020, 10, 4))
         #Query the updated data entry in the habits table and compare it to the testdata
-        self.assertEqual(daily_streak_break, self.select_data("BreakDaily")[0])
+        self.assertIn(daily_streak_break, self.select_data("BreakDaily"))
 
         #Check a weekly habit streak break
         #First insert a new habit
@@ -122,7 +117,7 @@ class TestHabit(unittest.TestCase):
         #Check the habit 8 days after to break the streak
         self.test_habit.check("BreakWeekly", date(2020, 10, 10))
         #Query the updated data entry in the habits table and compare it to the testdata
-        self.assertEqual(weekly_streak_break, self.select_data("BreakWeekly")[0])
+        self.assertIn(weekly_streak_break, self.select_data("BreakWeekly"))
 
     #Test for the delete() method
     def test_delete(self):
@@ -144,46 +139,65 @@ class TestAnalytics(unittest.TestCase):
         if os.path.exists("database.db"):
             #If the db exists, temporarily rename it
             os.rename("database.db", "database_user.db")
-            #Create a new database with the initialize() function
-            setup.Database.initialize()
+        #Create a new database with the initialize() function
+        setup.Database.initialize()
 
         #Establish a database connection
         connection = sqlite3.connect("database.db")
         db = connection.cursor()
 
         #Define the testdata for the habits table
-        habit1 = ["Workout", "Daily", "testuser", str(date.today()), 3, 8, 2]
-        habit2 = ["Shopping", "Weekly", "testuser", str(date.today()), 1, 3, 5]
+        self.habit1 = ["Workout", "Daily", "testuser", str(date.today()), 3, 8, 2]
+        self.habit2 = ["Shopping", "Weekly", "testuser", str(date.today()), 1, 3, 5]
 
         #Define the testdata for the tracking table
-        tracking1 = str(date.today())
-        tracking2 = str(date.today() + timedelte(days=1))
-        tracking2 = str(date.today() + timedelte(days=2))
+        self.tracking1 = str(date.today())
         
-        #Fill the database with test entries
+        #Fill the habits table with test entries
         db.execute('''INSERT INTO habits VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)''', 
-        (habit1[0], habit1[1], habit1[2], habit1[3], habit1[4], habit1[5], habit1[6]))
+        (self.habit1[0], self.habit1[1], self.habit1[2], self.habit1[3], self.habit1[4], self.habit1[5], self.habit1[6]))
 
         db.execute('''INSERT INTO habits VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)''', 
-        (habit2[0], habit2[1], habit2[2], habit2[3], habit2[4], habit2[5], habit2[6]))
+        (self.habit2[0], self.habit2[1], self.habit2[2], self.habit2[3],self.habit2[4], self.habit2[5], self.habit2[6]))
+
+        #Fill the trackingdata table with test entries
+        db.execute('''INSERT INTO trackingdata VALUES(NULL, ?, ?)''', (self.tracking1, 1))
 
         connection.commit()
         connection.close()
 
     #After completion of the tests restore the correct file structure
     def tearDown(self):
-        #Close the db connection
-        self.connection.close()
         #Delete the unittest db and rename the user db back to normal if it existed
         os.remove('database.db')
         if os.path.exists("database_user.db"):
             os.rename("database_user.db", "database.db")
 
+    #Test for the analytics functions
+    def test_analytics(self):
+        #Test the all() function
+        self.assertEqual(["Workout", "Shopping"], Analytics.all())
+        
+        #Test the similar() function
+        self.assertEqual(["Workout"], Analytics.similar("Daily"))
+        self.assertEqual(["Shopping"], Analytics.similar("Weekly"))
 
+        #Test the current() function
+        self.assertIn(self.habit1[4], Analytics.current("Workout"))
 
-    
+        #Test the longest() function for the overall longest streak
+        self.assertEqual(([self.habit1[0]], self.habit1[5]), Analytics.longest())
+        #Test the longest() function with a habit as argument
+        self.assertIn(self.habit2[5], Analytics.longest("Shopping"))
 
+        #Test the tracking() function
+        self.assertIn(str(date.today()), Analytics.tracking("Workout"))
 
+        #Test the breaks() function
+        #Create the expected dictionary
+        test_dictionary = {self.habit1[0] : self.habit1[6], self.habit2[0] : self.habit2[6]}
+    	#Compare against the returned dictionary
+        self.assertDictEqual(test_dictionary, Analytics.breaks())
 
 #Combine all tests
 test_suite = unittest.TestSuite()
