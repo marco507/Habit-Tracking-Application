@@ -1,5 +1,11 @@
-import unittest, sqlite3, os, io, sys
-import classes, setup, login
+import unittest
+import sqlite3
+import os
+import io
+import sys
+import classes
+import setup
+import login
 from analytics import Analytics
 from datetime import date, timedelta
 
@@ -32,7 +38,8 @@ class TestHabit(unittest.TestCase):
     # Helper function that queries a habit data entry
     def select_data(self, habitname):
         # Query the complete data entry
-        self.db.execute("""SELECT * FROM habits WHERE HabitName = ?""", (habitname,))
+        self.db.execute(
+            """SELECT * FROM habits WHERE HabitName = ?""", (habitname,))
         result = self.db.fetchall()
         return result
 
@@ -62,7 +69,8 @@ class TestHabit(unittest.TestCase):
 
         # Test an entry with a false period value and check the error message
         self.assertEqual(
-            "Incorrect period\n", self.test_habit.create("False-Period", "FalseValue")
+            "Incorrect period\n", self.test_habit.create(
+                "False-Period", "FalseValue")
         )
 
         # Try to create a habit that already exists
@@ -135,7 +143,8 @@ class TestHabit(unittest.TestCase):
 
         # Try to check an non existend habit
         self.assertEqual(
-            "The habit NoEntry does not exist\n", self.test_habit.check("NoEntry")
+            "The habit NoEntry does not exist\n", self.test_habit.check(
+                "NoEntry")
         )
 
         # Try to check an habit two times on the same day
@@ -162,7 +171,8 @@ class TestHabit(unittest.TestCase):
         # Check the habit a week after creation
         self.test_habit.check("IncreaseWeekly", str(date(2020, 10, 7)))
         # Query the updated data entry in the habits table and compare it to the testdata
-        self.assertIn(weekly_streak_increase, self.select_data("IncreaseWeekly"))
+        self.assertIn(weekly_streak_increase,
+                      self.select_data("IncreaseWeekly"))
 
         # Check a daily habit streak break
         # First insert a new habit
@@ -216,8 +226,10 @@ class TestAnalytics(unittest.TestCase):
         db = connection.cursor()
 
         # Define the testdata for the habits table
-        self.habit1 = ["Workout", "Daily", "testuser", str(date.today()), 3, 8, 2]
-        self.habit2 = ["Shopping", "Weekly", "testuser", str(date.today()), 1, 3, 5]
+        self.habit1 = ["Workout", "Daily",
+                       "testuser", str(date.today()), 3, 8, 2]
+        self.habit2 = ["Shopping", "Weekly",
+                       "testuser", str(date.today()), 1, 3, 5]
 
         # Define the testdata for the tracking table
         self.tracking1 = str(date.today())
@@ -251,7 +263,8 @@ class TestAnalytics(unittest.TestCase):
 
         # Fill the trackingdata table with test entries
         db.execute(
-            """INSERT INTO trackingdata VALUES(NULL, ?, ?)""", (self.tracking1, 1)
+            """INSERT INTO trackingdata VALUES(NULL, ?, ?)""", (
+                self.tracking1, 1)
         )
 
         connection.commit()
@@ -277,7 +290,8 @@ class TestAnalytics(unittest.TestCase):
         self.assertIn(self.habit1[4], Analytics.current("Workout"))
 
         # Test the longest() function for the overall longest streak
-        self.assertEqual(([self.habit1[0]], self.habit1[5]), Analytics.longest())
+        self.assertEqual(([self.habit1[0]], self.habit1[5]),
+                         Analytics.longest())
         # Test the longest() function with a habit as argument
         self.assertIn(self.habit2[5], Analytics.longest("Shopping"))
 

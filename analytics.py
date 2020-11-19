@@ -6,6 +6,8 @@ from decorators import user_message
 #   ------------------Helper Functions------------------
 
 # Helper function for establishing a database connection
+
+
 def connect_db():
     return sqlite3.connect("database.db").cursor()
 
@@ -119,7 +121,8 @@ class Analytics:
 
             # Return the value
             return max_dict(
-                create_dict(habit_list(select_data()), streak_list(select_data()))
+                create_dict(habit_list(select_data()),
+                            streak_list(select_data()))
             )
 
         # Search for the longest streak of a given habit
@@ -183,7 +186,8 @@ class Analytics:
                 return [j for i in dataset for j in i if j != habit_id]
 
             return return_date(
-                filter_data(retrieve_data(query_data(connect_db())), habit_id), habit_id
+                filter_data(retrieve_data(query_data(
+                    connect_db())), habit_id), habit_id
             )
 
         # Return the tracking data entries

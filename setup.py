@@ -8,6 +8,8 @@ from datetime import date, datetime, timedelta
 from decorators import capture_print
 
 # Class for giving all database related functions a single namespace
+
+
 class Database:
 
     # Function for the initialisation of the database by creating all default tables
@@ -135,7 +137,8 @@ class Database:
                         entry_date = entry_date + timedelta(days=7)
                     # Choice B = Streak is broken = random 8 to 10 day timedifference
                     elif choice(possibility_weekly) == "B":
-                        entry_date = entry_date + timedelta(days=randint(8, 10))
+                        entry_date = entry_date + \
+                            timedelta(days=randint(8, 10))
                     # Choice C = Streak continous = random 4 to 6 day timedifference
                     else:
                         entry_date = entry_date + timedelta(days=randint(4, 6))

@@ -2,6 +2,8 @@ import fire
 import os
 
 # Class for wrapping user-related functions
+
+
 class User:
 
     # Store an username in the credentials.txt file

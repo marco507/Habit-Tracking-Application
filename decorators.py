@@ -1,7 +1,11 @@
-import io, sys, os
+import io
+import sys
+import os
 import login
 
 # Decorator for capturing print() output
+
+
 def capture_print(function):
     def wrapper(*args):
         # Check if the credentials.txt exist and return the username
