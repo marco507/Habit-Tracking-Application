@@ -43,7 +43,6 @@ class Habit(object):
     # Method for creating and storing a habit in the Database
     @capture_print
     def create(self, name, period, entry_date=date.today()):
-
         # Ensure the correct date for normal program execution
         entry_date = self.__filter_date(entry_date)
 
@@ -73,7 +72,6 @@ class Habit(object):
     @capture_print
     # Method for deleting a habit
     def delete(self, name):
-
         # Check if the habit exists
         if self.__check_existence(name):
 
@@ -96,7 +94,6 @@ class Habit(object):
     @capture_print
     # Method for checking a habit
     def check(self, name, entry_date=date.today()):
-
         # Ensure the correct date for normal program execution
         entry_date = self.__filter_date(entry_date)
 
