@@ -16,9 +16,9 @@ Habit Tracker is a simple command line application for managing and analyzing se
 To use the habit tracker you need an installation of Python 3.9.0.
 To install:
 1. Download the application package from Github and extract the contents.
-2. Install 'pipenv' with 'pip install pipenv' if you don't have it already installed.
-3. Open a command prompt in the extracted folder and execute 'pipenv install' to install the dependencies.
-4. Run 'pipenv shell' to enter the new virtual environment
+2. Install `pipenv` with `pip install pipenv` if you don't have it already installed.
+3. Open a command prompt in the extracted folder and execute `pipenv install` to install the dependencies.
+4. Run `pipenv shell` to enter the new virtual environment
 5. You are ready to use the habit tracker
 
 ## Usage
@@ -27,10 +27,6 @@ For using the habit tracker refer to the manual which is contained in the applic
 ## Dependencies
 * Fire
 * Pandas
-The dependent libraries are installed with pipenv through pipfile.
 
 ## License
 GPL-3.0 License
-
-
-
