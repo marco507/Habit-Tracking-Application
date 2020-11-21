@@ -9,7 +9,7 @@ Habit Tracker is a simple command line application for managing and analyzing se
 * Analyze habits with the built-in analytics module
 * Allows multiple users
 * Clean command line interface
-* Lightweight database in a single file
+* Lightweight relational database in a single file
 * Intergrated unit test suite 
 
 ## Installation
