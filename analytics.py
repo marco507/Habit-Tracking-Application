@@ -75,7 +75,7 @@ class Analytics:
     @staticmethod
     @user_message
     def all():
-        """ Function that lists all tracked habits of the logged-in user """
+        """ Command that lists all tracked habits of the logged-in user """
 
         return [i[return_index("HabitName", connect_db())] for i in select_data()]
 
@@ -83,7 +83,7 @@ class Analytics:
     @staticmethod
     @user_message
     def similar(period):
-        """ Function that lists all habits grouped by period """
+        """ Command that lists all habits grouped by period """
 
         return [
             i[return_index("HabitName", connect_db())]
@@ -95,7 +95,7 @@ class Analytics:
     @staticmethod
     @user_message
     def longest(habit=None):
-        """ Function that returns the longest streak overall or of a given habit """
+        """ Command that returns the longest streak overall or of a given habit """
 
         # Search for the longest streak overall
         def longest_streak_overall(dataset):
@@ -121,8 +121,7 @@ class Analytics:
 
             # Return the value
             return max_dict(
-                create_dict(habit_list(select_data()),
-                            streak_list(select_data()))
+                create_dict(habit_list(select_data()), streak_list(select_data()))
             )
 
         # Search for the longest streak of a given habit
@@ -145,7 +144,7 @@ class Analytics:
     @staticmethod
     @user_message
     def current(habit):
-        """ Function that returns the current streak of a given habit """
+        """ Command that returns the current streak of a given habit """
 
         # Query all data of the logged in user and return the current streak of a given habit with a list comprehension
         return [
@@ -158,6 +157,7 @@ class Analytics:
     @staticmethod
     @user_message
     def tracking(habit):
+        """ Command that returns all check dates of a given habit """
 
         # Return the given habits id
         def return_habit_id(habit, dataset):
@@ -186,8 +186,7 @@ class Analytics:
                 return [j for i in dataset for j in i if j != habit_id]
 
             return return_date(
-                filter_data(retrieve_data(query_data(
-                    connect_db())), habit_id), habit_id
+                filter_data(retrieve_data(query_data(connect_db())), habit_id), habit_id
             )
 
         # Return the tracking data entries
@@ -197,7 +196,7 @@ class Analytics:
     @staticmethod
     @user_message
     def breaks():
-        """ Function that returns all habits with a streak break and the number of streak breaks """
+        """ Command that returns all habits with a streak break and the number of streak breaks """
 
         # Return the "HabitName" values from the dataset with a list comprehension
         def habit_list(dataset):

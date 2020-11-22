@@ -16,6 +16,7 @@ class Database:
     @staticmethod
     @capture_print
     def initialize():
+        """ Command for creating the database with all default tables """
 
         # Create a database and a cursor object
         connection = sqlite3.connect("database.db")
@@ -65,6 +66,8 @@ class Database:
     # Function for deleting the database
     @staticmethod
     def delete():
+        """ Command for deleting the database """
+
         # Check if the database file exists and delete it
         if os.path.exists("database.db"):
             os.remove("database.db")
@@ -76,6 +79,7 @@ class Database:
     # Function for inserting the default data
     @staticmethod
     def testdata():
+        """ Command for inserting random default data into the database """
 
         # Check if the database is initialized
         if os.path.exists("database.db"):
@@ -132,8 +136,7 @@ class Database:
                             entry_date = entry_date + timedelta(days=1)
                         # Choice B = Streak is broken = random 2 or 3 day timedifference
                         else:
-                            entry_date = entry_date + \
-                                timedelta(days=randint(2, 3))
+                            entry_date = entry_date + timedelta(days=randint(2, 3))
 
                     else:
                         # Choice A = Streak continues = 7 day timediffernence
@@ -141,12 +144,10 @@ class Database:
                             entry_date = entry_date + timedelta(days=7)
                         # Choice B = Streak is broken = random 8 to 10 day timedifference
                         elif choice(possibility_weekly) == "B":
-                            entry_date = entry_date + \
-                                timedelta(days=randint(8, 10))
+                            entry_date = entry_date + timedelta(days=randint(8, 10))
                         # Choice C = Streak continous = random 4 to 6 day timedifference
                         else:
-                            entry_date = entry_date + \
-                                timedelta(days=randint(4, 6))
+                            entry_date = entry_date + timedelta(days=randint(4, 6))
 
                 # Set the last tracking entry at the end date (31.10.2020)
                 testdata.check(i, end_date)
