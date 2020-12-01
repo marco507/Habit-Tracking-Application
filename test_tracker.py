@@ -3,8 +3,8 @@ import sqlite3
 import os
 import io
 import sys
-import classes
-import setup
+import habits
+import admin
 import login
 from analytics import Analytics
 from datetime import date, timedelta
@@ -19,10 +19,10 @@ class TestHabit(unittest.TestCase):
             # If the db exists, temporarily rename it
             os.rename("database.db", "database_user.db")
         # Create a new database with the initialize() function
-        setup.Database.initialize()
+        admin.Database.initialize()
 
         # Create a new instance of the Habit() class method and establish a database connection
-        self.test_habit = classes.Habit()
+        self.test_habit = habits.Habit()
         self.connection = self.test_habit._connection
         self.db = self.connection.cursor()
 
@@ -198,7 +198,7 @@ class TestHabit(unittest.TestCase):
     def test_delete(self):
         # Try to delete an non existing habit and capture the error message
         self.assertEqual(
-            "The habit NonExisting does not exist\n",
+            "The habit does not exist\n",
             self.test_habit.delete("NonExisting"),
         )
 
@@ -219,7 +219,7 @@ class TestAnalytics(unittest.TestCase):
             # If the db exists, temporarily rename it
             os.rename("database.db", "database_user.db")
         # Create a new database with the initialize() function
-        setup.Database.initialize()
+        admin.Database.initialize()
 
         # Establish a database connection
         connection = sqlite3.connect("database.db")
