@@ -304,7 +304,7 @@ class Habit(object):
 
         # Give back an error message if the habit does not exists
         else:
-            print("The habit " + name + " does not exist")
+            print("The habit does not exist")
 
         # Commit the changes
         self._connection.commit()
