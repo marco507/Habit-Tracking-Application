@@ -75,9 +75,22 @@ class Analytics:
     @staticmethod
     @user_message
     def all():
-        """ Command that lists all tracked habits of the logged-in user """
+        """ Command that lists all tracked habits (ID : Habit) of the logged-in user """
 
-        return [i[return_index("HabitName", connect_db())] for i in select_data()]
+        # Return the "HabitName" values from the dataset with a list comprehension
+        def habit_list(dataset):
+            return [i[return_index("HabitName", connect_db())] for i in dataset]
+
+        # Return the "HabitID" values from the dataset with a list comprehension
+        def id_list(dataset):
+            return [i[return_index("HabitID", connect_db())] for i in dataset]
+
+        # Return a dictionary with a dictionary comprehension containing all habits with streak breaks
+        def return_dictionary(id_list, habit_list):
+            return {k: v for k, v in zip(id_list, habit_list)}
+
+        # Return the data
+        return return_dictionary(id_list(select_data()), habit_list(select_data()))
 
     # Function for returning all habits with the same period
     @staticmethod
@@ -92,6 +105,7 @@ class Analytics:
         ]
 
     # Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
+
     @staticmethod
     @user_message
     def longest(habit=None):
@@ -121,7 +135,8 @@ class Analytics:
 
             # Return the value
             return max_dict(
-                create_dict(habit_list(select_data()), streak_list(select_data()))
+                create_dict(habit_list(select_data()),
+                            streak_list(select_data()))
             )
 
         # Search for the longest streak of a given habit
@@ -186,7 +201,8 @@ class Analytics:
                 return [j for i in dataset for j in i if j != habit_id]
 
             return return_date(
-                filter_data(retrieve_data(query_data(connect_db())), habit_id), habit_id
+                filter_data(retrieve_data(query_data(
+                    connect_db())), habit_id), habit_id
             )
 
         # Return the tracking data entries
