@@ -5,9 +5,8 @@ from decorators import user_message
 
 #   ------------------Helper Functions------------------
 
+
 # Helper function for establishing a database connection
-
-
 def connect_db():
     return sqlite3.connect("database.db").cursor()
 
@@ -36,6 +35,15 @@ def select_data():
         return db.execute("""SELECT * FROM habits WHERE User = ?""", (user,))
 
     return retrieve_data(query_data(connect_db(), login.User.whoami()))
+
+
+# Helper function for querying the supported periods
+def check_periods(period):
+    # Query the periods from the periods table
+    def query_periods(db):
+        return db.execute(""" SELECT * FROM periods WHERE Period = ? """, (period,))
+
+    return retrieve_data(query_periods(connect_db()))
 
 
 #   ------------------CLI Functions------------------
@@ -98,16 +106,24 @@ class Analytics:
     def similar(period):
         """ Command that lists all habits grouped by period """
 
-        return [
-            i[return_index("HabitName", connect_db())]
-            for i in select_data()
-            if i[return_index("Period", connect_db())] == period
-        ]
+        # Return the habits with the correct period with a list comprehension
+        def return_habits(dataset, period):
+            return [
+                i[return_index("HabitName", connect_db())]
+                for i in dataset
+                if i[return_index("Period", connect_db())] == period
+            ]
+
+        # Return an error message
+        def return_error():
+            return "Wrong Period"
+
+        return return_habits(select_data(), period) if check_periods(period) else return_error()
 
     # Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
 
     @staticmethod
-    @user_message
+    # @user_message
     def longest(habit=None):
         """ Command that returns the longest streak overall or of a given habit """
 
@@ -127,19 +143,13 @@ class Analytics:
 
             # Return the habit/s with the longest streak and the longest streak value with a list comprehension
             def max_dict(dictionary):
-                return [
-                    k
-                    for k, v in dictionary.items()
-                    if v == max(dictionary.values(), default=[])
-                ], max(dictionary.values(), default=[])
+                return {k: v for k, v in dictionary.items() if v == max(dictionary.values(), default=[])}
 
             # Return the value
-            return max_dict(
-                create_dict(habit_list(select_data()),
-                            streak_list(select_data()))
-            )
+            return max_dict(create_dict(habit_list(select_data()), streak_list(select_data())))
 
         # Search for the longest streak of a given habit
+
         def longest_streak_habit(habit, dataset):
             # Query all data of the logged in user with the select_data function and return the "LongestStreak" value with a list comprehension
             return [
