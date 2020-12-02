@@ -50,6 +50,20 @@ class Database:
             """
             )
 
+            # Create a table for periods
+            db.execute(
+                """ CREATE TABLE periods (
+                    PeriodID INTEGER PRIMARY KEY,
+                    Period TEXT NOT NULL,
+                    Intervall INTEGER NOT NULL
+                ) 
+                """
+            )
+
+            # Fill the periods table with the supported periods (Daily, Weekly)
+            db.execute(""" INSERT INTO periods Values (NULL, "Daily", "1") """)
+            db.execute(""" INSERT INTO periods Values (NULL, "Weekly", "7") """)
+
             # Commit the changes
             connection.commit()
 
@@ -136,7 +150,8 @@ class Database:
                             entry_date = entry_date + timedelta(days=1)
                         # Choice B = Streak is broken = random 2 or 3 day timedifference
                         else:
-                            entry_date = entry_date + timedelta(days=randint(2, 3))
+                            entry_date = entry_date + \
+                                timedelta(days=randint(2, 3))
 
                     else:
                         # Choice A = Streak continues = 7 day timediffernence
@@ -144,10 +159,12 @@ class Database:
                             entry_date = entry_date + timedelta(days=7)
                         # Choice B = Streak is broken = random 8 to 10 day timedifference
                         elif choice(possibility_weekly) == "B":
-                            entry_date = entry_date + timedelta(days=randint(8, 10))
+                            entry_date = entry_date + \
+                                timedelta(days=randint(8, 10))
                         # Choice C = Streak continous = random 4 to 6 day timedifference
                         else:
-                            entry_date = entry_date + timedelta(days=randint(4, 6))
+                            entry_date = entry_date + \
+                                timedelta(days=randint(4, 6))
 
                 # Set the last tracking entry at the end date (31.10.2020)
                 testdata.check(i, end_date)

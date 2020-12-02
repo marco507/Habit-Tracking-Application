@@ -53,7 +53,24 @@ class Habit(object):
             # The identifier is already a habit name
             return identifier
 
+    # Helper function for checking if a period exists
+    def __check_periods(self, period):
+        # Query the periods from the periods table and return the results
+        self._db.execute(
+            """ SELECT * FROM periods WHERE Period = ? """, (period,))
+        exists = self._db.fetchall()
+        return exists
+
+    # Helper function for returning the intervall of period
+    def __return_intervall(self, period):
+        # Query the value from the periods table and return the results
+        self._db.execute(
+            """ SELECT Intervall FROM periods WHERE Period = ? """, (period,))
+        intervall = self.__extract_value()
+        return intervall
+
     # Helper function for extracting a single value from a returned SELECT query
+
     def __extract_value(self):
         # Extracting the value from the returned list of tuples
         result = self._db.fetchall()
@@ -83,7 +100,7 @@ class Habit(object):
 
         else:
             # Check if the period value is correct
-            if period == "Daily" or period == "Weekly":
+            if self.__check_periods(period):
 
                 # Give back an error message if the habit exists
                 if self.__check_existence(name):
@@ -117,7 +134,7 @@ class Habit(object):
                         + str(habit_id)
                     )
 
-            # Print an error message if the period value is not Daily or Weekly
+            # Print an error message if the period is incorrect
             else:
                 print("Incorrect period")
 
@@ -187,14 +204,6 @@ class Habit(object):
                 habit_id = self.__extract_value()
 
                 # Manage the streak
-                # Return the period of the habit from the database
-                self._db.execute(
-                    """SELECT Period FROM habits WHERE HabitName = ? AND User = ?""",
-                    (name, self._username),
-                )
-                # Extracting the value for the period from the returned list of tuples
-                period = self.__extract_value()
-
                 # Return the last tracking data entry of the habit
                 self._db.execute(
                     """SELECT MAX(CheckDate) FROM trackingdata WHERE HabitID = ?""",
@@ -222,54 +231,40 @@ class Habit(object):
                     date_difference = entry_date - last_date
 
                     # Check the date difference against the habit period
-                    # For period the Daily the date difference must be exactly 1 day
-                    if period == "Daily":
-                        # If the date difference is 1 day, increment the streak by 1
-                        if date_difference.days == 1:
-                            self._db.execute(
-                                """UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?""",
-                                (habit_id,),
-                            )
-                            # Print a message if the streak is mantained
-                            print("Streak for " + name + " increased")
-                        # If the date difference is > 1 set the streak to zero
-                        else:
-                            # Set the current streak to zero
-                            self._db.execute(
-                                """UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?""",
-                                (habit_id,),
-                            )
-                            # Increase the breaks by one
-                            self._db.execute(
-                                """UPDATE habits SET Breaks = Breaks + 1 WHERE HabitID = ?""",
-                                (habit_id,),
-                            )
-                            # Print a message if the streak is broken
-                            print("Streak for " + name + " set to zero")
 
-                    # If the period of the habit is Weekly, the difference must be <= 7
+                    # Query the period of the given habit
+                    self._db.execute(
+                        """ SELECT Period FROM habits WHERE HabitID = ? AND User = ? """, (habit_id, self._username))
+                    period = self.__extract_value()
+
+                    # Query the intervall of the period
+                    self._db.execute(
+                        """ SELECT Intervall FROM periods WHERE Period = ? """, (period,))
+                    intervall = self.__extract_value()
+
+                    # If the date difference is smaller or euqal the habits intervall, increment the streak
+                    if date_difference.days <= intervall:
+                        self._db.execute(
+                            """UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?""",
+                            (habit_id,),
+                        )
+                        # Print a message if the streak is mantained
+                        print("Streak for " + name + " increased")
+
+                    # If the date difference is > intervall set the streak to zero
                     else:
-                        if date_difference.days <= 7:
-                            self._db.execute(
-                                """UPDATE habits SET CurrentStreak = CurrentStreak + 1 WHERE HabitID = ?""",
-                                (habit_id,),
-                            )
-                            # Print a message if the streak is mantained
-                            print("Streak for " + name + " increased")
-                        # If the date difference is > 7 set the streak to zero
-                        else:
-                            # Set the current streak to zero
-                            self._db.execute(
-                                """UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?""",
-                                (habit_id,),
-                            )
-                            # Increase the breaks by one
-                            self._db.execute(
-                                """UPDATE habits SET Breaks = Breaks + 1 WHERE HabitID = ?""",
-                                (habit_id,),
-                            )
-                            # Print a message if the streak is broken
-                            print("Streak for " + name + " set to zero")
+                        # Set the current streak to zero
+                        self._db.execute(
+                            """UPDATE habits SET CurrentStreak = 0 WHERE HabitID = ?""",
+                            (habit_id,),
+                        )
+                        # Increase the breaks by one
+                        self._db.execute(
+                            """UPDATE habits SET Breaks = Breaks + 1 WHERE HabitID = ?""",
+                            (habit_id,),
+                        )
+                        # Print a message if the streak is broken
+                        print("Streak for " + name + " set to zero")
 
                 # Check if the current streak is the longest streak
 
