@@ -5,7 +5,7 @@ import io
 import sys
 import habits
 import admin
-import login
+import admin
 from analytics import Analytics
 from datetime import date, timedelta
 
@@ -143,7 +143,7 @@ class TestHabit(unittest.TestCase):
 
         # Try to check an non existend habit
         self.assertEqual(
-            "The habit NoEntry does not exist\n", self.test_habit.check(
+            "The habit does not exist\n", self.test_habit.check(
                 "NoEntry")
         )
 
@@ -280,7 +280,7 @@ class TestAnalytics(unittest.TestCase):
     # Test for the analytics functions
     def test_analytics(self):
         # Test the all() function
-        self.assertEqual(["Workout", "Shopping"], Analytics.all())
+        self.assertEqual({1: "Workout", 2: "Shopping"}, Analytics.all())
 
         # Test the similar() function
         self.assertEqual(["Workout"], Analytics.similar("Daily"))
@@ -290,7 +290,7 @@ class TestAnalytics(unittest.TestCase):
         self.assertIn(self.habit1[4], Analytics.current("Workout"))
 
         # Test the longest() function for the overall longest streak
-        self.assertEqual(([self.habit1[0]], self.habit1[5]),
+        self.assertEqual({self.habit1[0]: self.habit1[5]},
                          Analytics.longest())
         # Test the longest() function with a habit as argument
         self.assertIn(self.habit2[5], Analytics.longest("Shopping"))
@@ -315,8 +315,8 @@ test_suite.addTest(TestAnalytics())
 
 if __name__ == "__main__":
     # Login as testuser
-    login.User.login("testuser")
+    admin.User.login("testuser")
     # Start the unittest
     unittest.main(exit=False)
     # Logout
-    login.User.logout()
+    admin.User.logout()

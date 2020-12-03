@@ -1,7 +1,7 @@
 import sqlite3
 import io
 import sys
-import login
+import user
 import analytics
 from decorators import capture_print
 from datetime import date, timedelta, datetime
@@ -12,7 +12,7 @@ from datetime import date, timedelta, datetime
 class Habit(object):
     def __init__(self):
         # Assign the stored username to the username attribute
-        self._username = login.User.whoami()
+        self._username = user.User.whoami()
         # Establish the database connection and cursor
         self._connection = sqlite3.connect("database.db")
         self._db = self._connection.cursor()
@@ -70,7 +70,6 @@ class Habit(object):
         return intervall
 
     # Helper function for extracting a single value from a returned SELECT query
-
     def __extract_value(self):
         # Extracting the value from the returned list of tuples
         result = self._db.fetchall()
@@ -195,7 +194,6 @@ class Habit(object):
                 print("The habit is already checked for today")
 
             else:
-                # Return the HabitID from the database
                 self._db.execute(
                     """SELECT HabitID FROM habits WHERE HabitName = ? AND User = ?""",
                     (name, self._username),
@@ -303,10 +301,3 @@ class Habit(object):
 
         # Commit the changes
         self._connection.commit()
-
-
-# Class for wrapping all functionality for the command line interface
-class Pipeline(object):
-    def __init__(self):
-        self.manage = Habit()
-        self.analyse = analytics.Analytics()

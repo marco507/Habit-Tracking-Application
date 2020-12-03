@@ -1,7 +1,8 @@
 import pandas as pd
 import sqlite3
-import login
+import user
 from decorators import user_message
+from functools import reduce
 
 #   ------------------Helper Functions------------------
 
@@ -34,7 +35,22 @@ def select_data():
     def query_data(db, user):
         return db.execute("""SELECT * FROM habits WHERE User = ?""", (user,))
 
-    return retrieve_data(query_data(connect_db(), login.User.whoami()))
+    return retrieve_data(query_data(connect_db(), user.User.whoami()))
+
+
+# Helper function for returning a name if an ID is given as argument
+def check_name(habit):
+
+    # Query the habits name if a ID is given as argument
+    def return_name(db, habit, user):
+        return db.execute(""" SELECT HabitName FROM habits WHERE HabitID = ? AND User = ?""", (habit, user))
+
+    # Returns the habits name string value from the list
+    def return_string(name):
+        return max(name, default=[])
+
+    return return_string(retrieve_data(return_name(
+        connect_db(), habit, user.User.whoami()))) if type(habit) is int else [habit]
 
 
 # Helper function for querying the supported periods
@@ -51,6 +67,7 @@ def check_periods(period):
 class Analytics:
 
     # Testfunction that shows the habits table
+
     @staticmethod
     def _show_habits():
         # Establish DB connection
@@ -123,7 +140,7 @@ class Analytics:
     # Function for returning the longest streak overall (No argument given) and the longest streak of a habit (Argument = Habit)
 
     @staticmethod
-    # @user_message
+    @user_message
     def longest(habit=None):
         """ Command that returns the longest streak overall or of a given habit """
 
@@ -162,7 +179,7 @@ class Analytics:
         return (
             longest_streak_overall(select_data())
             if habit == None
-            else longest_streak_habit(habit, select_data())
+            else longest_streak_habit(max(check_name(habit), default=[]), select_data())
         )
 
     # Return the current streak of a given habit
@@ -172,11 +189,10 @@ class Analytics:
         """ Command that returns the current streak of a given habit """
 
         # Query all data of the logged in user and return the current streak of a given habit with a list comprehension
-        return [
-            i[return_index("CurrentStreak", connect_db())]
-            for i in select_data()
-            if i[return_index("HabitName", connect_db())] == habit
-        ]
+        def return_current(habit):
+            return [i[return_index("CurrentStreak", connect_db())] for i in select_data() if i[return_index("HabitName", connect_db())] == habit]
+
+        return return_current(max(check_name(habit), default=[]))
 
     # Function for returning a habits tracking data
     @staticmethod
@@ -216,11 +232,11 @@ class Analytics:
             )
 
         # Return the tracking data entries
-        return return_tracking(return_habit_id(habit, select_data()))
+        return return_tracking(return_habit_id(max(check_name(habit), default=[]), select_data()))
 
     # Function for returning all habits with a streak break and the number of streak breaks
-    @staticmethod
-    @user_message
+    @ staticmethod
+    @ user_message
     def breaks():
         """ Command that returns all habits with a streak break and the number of streak breaks """
 

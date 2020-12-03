@@ -1,16 +1,19 @@
 import fire
-import habits
+import pipeline
 import os
+import admin
+import user
 
 if __name__ == "__main__":
 
-    # Check if the database is initialized
-    if os.path.exists("database.db"):
-        # Check if a user is logged in
-        if os.path.exists("credentials.txt"):
-            # Expose to the command line
-            fire.Fire(habits.Pipeline)
-        else:
-            print("Please log-in first")
+    # Initialize the database if it do not exist
+    if not os.path.exists("database.db"):
+        admin.Database._initialize()
+
+    # Check if a user is logged in
+    if user.return_user() != "loggedout":
+        # Expose all functionality to the command line
+        fire.Fire(pipeline.Pipeline)
+
     else:
-        print("Please initialize the database")
+        print("Log-in first")

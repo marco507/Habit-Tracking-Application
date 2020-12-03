@@ -1,47 +1,38 @@
 import io
 import sys
 import os
-import login
+import user
+import sqlite3
+
 
 # Decorator for capturing print() output
-
-
 def capture_print(function):
     def wrapper(*args):
-        # Check if the credentials.txt exist and return the username
-        if os.path.exists("credentials.txt"):
-            credentials = open("credentials.txt", "r")
-            user = credentials.read()
-            credentials.close()
-            # Capture the print() output when testuser is logged in
-            if user == "testuser":
-                # Create a StrinIO object
-                capturedOutput = io.StringIO()
-                # Redirect stdout to the StringIO objects
-                sys.stdout = capturedOutput
-                # Call the function
-                function(*args)
-                # Redirect stdout back to the terminal
-                sys.stdout = sys.__stdout__
-                return capturedOutput.getvalue()
-
-            # Execute the given function normally
-            else:
-                # If the command format is incorrect raise and error message
-                try:
-                    # Call the function
-                    function(*args)
-                except TypeError:
-                    # Redirect stdout back to the terminal
-                    sys.stdout = sys.__stdout__
-                    # Return an error message
-                    print("Incorrect command")
-
-        # Execute all functions normally that require no logged in user (Database)
-        else:
+        # Return the username
+        current_user = user.return_user()
+        # Capture the print() output when testuser is logged in
+        if current_user == "testuser":
+            # Create a StrinIO object
+            capturedOutput = io.StringIO()
+            # Redirect stdout to the StringIO objects
+            sys.stdout = capturedOutput
             # Call the function
             function(*args)
+            # Redirect stdout back to the terminal
+            sys.stdout = sys.__stdout__
+            return capturedOutput.getvalue()
 
+        # Execute the given function normally
+        else:
+            # If the command format is incorrect raise and error message
+            try:
+                # Call the function
+                function(*args)
+            except TypeError:
+                # Redirect stdout back to the terminal
+                sys.stdout = sys.__stdout__
+                # Return an error message
+                print("Incorrect command")
     return wrapper
 
 
