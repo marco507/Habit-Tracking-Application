@@ -5,7 +5,7 @@ import io
 import sys
 import habits
 import admin
-import admin
+import user
 from analytics import Analytics
 from datetime import date, timedelta
 
@@ -19,7 +19,10 @@ class TestHabit(unittest.TestCase):
             # If the db exists, temporarily rename it
             os.rename("database.db", "database_user.db")
         # Create a new database with the initialize() function
-        admin.Database.initialize()
+        admin.Database._initialize()
+
+        # Login as testuser
+        user.User.login("testuser")
 
         # Create a new instance of the Habit() class method and establish a database connection
         self.test_habit = habits.Habit()
@@ -219,7 +222,10 @@ class TestAnalytics(unittest.TestCase):
             # If the db exists, temporarily rename it
             os.rename("database.db", "database_user.db")
         # Create a new database with the initialize() function
-        admin.Database.initialize()
+        admin.Database._initialize()
+
+        # Login as testuser
+        user.User.login("testuser")
 
         # Establish a database connection
         connection = sqlite3.connect("database.db")
@@ -314,9 +320,5 @@ test_suite.addTest(TestHabit())
 test_suite.addTest(TestAnalytics())
 
 if __name__ == "__main__":
-    # Login as testuser
-    admin.User.login("testuser")
     # Start the unittest
     unittest.main(exit=False)
-    # Logout
-    admin.User.logout()
