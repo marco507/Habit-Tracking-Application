@@ -112,9 +112,6 @@ class Database:
         # Define the creation date of the default habits as 01.10.2020
         default_date = date(2020, 10, 1)
 
-        # Save the current username
-        current_user = user.User.whoami()
-
         # Login as testuser
         user.User.login("testuser")
 
