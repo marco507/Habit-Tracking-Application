@@ -155,9 +155,10 @@ class TestHabit(unittest.TestCase):
         self.test_habit.create("DoubleCheck", "Daily")
         self.test_habit.check("DoubleCheck")
         # Catch the error message when trying to check the habit a second time on the same day
+        # Check with the ID to test the "Check by ID" functionality
         self.assertEqual(
             "The habit is already checked for today\n",
-            self.test_habit.check("DoubleCheck"),
+            self.test_habit.check(1),
         )
 
         # Check a daily habit increase of the longest and current streak
@@ -205,10 +206,19 @@ class TestHabit(unittest.TestCase):
             self.test_habit.delete("NonExisting"),
         )
 
+        # Delete by Name
         # Insert a test habit
         self.test_habit.create("DeleteMe", "Daily")
         # Delete the habit
         self.test_habit.delete("DeleteMe")
+        # Try to query the testhabit
+        self.assertFalse(self.select_data("DeleteMe"))
+
+        # Delete by ID
+        # Insert a test habit
+        self.test_habit.create("DeleteMe", "Daily")
+        # Delete the habit
+        self.test_habit.delete(1)
         # Try to query the testhabit
         self.assertFalse(self.select_data("DeleteMe"))
 
@@ -293,16 +303,25 @@ class TestAnalytics(unittest.TestCase):
         self.assertEqual(["Shopping"], Analytics.similar("Weekly"))
 
         # Test the current() function
+        # Test with "HabitName" as argument
         self.assertIn(self.habit1[4], Analytics.current("Workout"))
+        # Test with "HabitID" as argument
+        self.assertIn(self.habit1[4], Analytics.current(1))
 
         # Test the longest() function for the overall longest streak
         self.assertEqual({self.habit1[0]: self.habit1[5]},
                          Analytics.longest())
         # Test the longest() function with a habit as argument
+        # Test with "HabitName" as argument
         self.assertIn(self.habit2[5], Analytics.longest("Shopping"))
+        # Test with "HabitID" as argument
+        self.assertIn(self.habit2[5], Analytics.longest(2))
 
         # Test the tracking() function
+        # Test with "HabitName" as argument
         self.assertIn(str(date.today()), Analytics.tracking("Workout"))
+        # Test with "HabitID" as argument
+        self.assertIn(str(date.today()), Analytics.tracking(1))
 
         # Test the breaks() function
         # Create the expected dictionary

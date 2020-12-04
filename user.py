@@ -1,5 +1,7 @@
 import sqlite3
 import fire
+import os
+import admin
 
 
 # Helper function for returning the users table
@@ -82,4 +84,9 @@ class User:
 
 
 if __name__ == "__main__":
+
+    # Initialize the database if it do not exist
+    if not os.path.exists("database.db"):
+        admin.Database._initialize()
+
     fire.Fire(User())
