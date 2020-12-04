@@ -87,7 +87,7 @@ class Database:
         # Check if the database file exists and delete it
         if os.path.exists("database.db"):
             os.remove("database.db")
-            return "Database deleted"
+            return "Restored default state"
         # Return an error message if the DB file do not exist
         else:
             print("Database don't exist")
