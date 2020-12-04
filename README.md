@@ -1,7 +1,7 @@
 # Habit Tracker : Simple command line habit tracking application
 
 ## Overview
-Habit Tracker is a simple command line application for managing and analyzing self-defined periodic habits. The application features a clean command line interface and is controlled by calling functions with their respective arguments, much like well known UNIX tools, for example grep. It runs on a lightweight relational database stored in a single file, so no need to set-up a full SQL server.
+Habit Tracker is a simple command line application for managing and analysing self-defined periodic habits. The application features a clean command line interface and is controlled by calling functions with their respective arguments, much like well known UNIX tools, for example grep. It runs on a lightweight relational database stored in a single file, so no need to set-up a full SQL server.
 
 ## Features
 * Create and manage self defined habits
