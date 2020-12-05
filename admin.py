@@ -8,8 +8,6 @@ from datetime import date, datetime, timedelta
 from decorators import capture_print
 
 # Class for giving all database related functions a single namespace
-
-
 class Database:
 
     # Function for the initialisation of the database by creating all default tables
