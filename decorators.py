@@ -4,7 +4,6 @@ import os
 import user
 import sqlite3
 
-
 # Decorator for capturing print() output
 def capture_print(function):
     def wrapper(*args):
