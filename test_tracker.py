@@ -9,7 +9,7 @@ import user
 from analytics import Analytics
 from datetime import date, timedelta
 
-
+# TestCase for the habit management functionality
 class TestHabit(unittest.TestCase):
 
     # Define all necessary settings in setUp
@@ -222,7 +222,7 @@ class TestHabit(unittest.TestCase):
         # Try to query the testhabit
         self.assertFalse(self.select_data("DeleteMe"))
 
-
+# TestCase for the analytic functionality
 class TestAnalytics(unittest.TestCase):
 
     # Define all necessary settings in setUp
