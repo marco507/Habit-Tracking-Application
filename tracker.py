@@ -14,6 +14,7 @@ if __name__ == "__main__":
     if user.return_user() != "loggedout":
         # Expose all functionality to the command line
         fire.Fire(pipeline.Pipeline)
-
+   
+    # Print an error message
     else:
         print("Log-in first")
