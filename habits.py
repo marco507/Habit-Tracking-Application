@@ -7,8 +7,6 @@ from decorators import capture_print
 from datetime import date, timedelta, datetime
 
 # Class for creating, deleting and checking habits.
-
-
 class Habit(object):
     def __init__(self):
         # Assign the stored username to the username attribute
