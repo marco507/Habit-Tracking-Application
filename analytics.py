@@ -6,7 +6,6 @@ from functools import reduce
 
 #   ------------------Helper Functions------------------
 
-
 # Helper function for establishing a database connection
 def connect_db():
     return sqlite3.connect("database.db").cursor()
