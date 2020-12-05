@@ -3,7 +3,6 @@ import fire
 import os
 import admin
 
-
 # Helper function for returning the users table
 def return_user():
     # Establish a database connection
